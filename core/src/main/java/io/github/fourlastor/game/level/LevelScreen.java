@@ -121,14 +121,17 @@ public class LevelScreen extends ScreenAdapter {
         debugInfo.addActor(tod);
         stage.addActor(debugInfo);
 
-        container.listen(state -> {
-            battery.setText("Battery " + state.battery() + "%");
-            day.setText("Day " + (state.day() + 1) + " / 7");
-            tod.setText("Time " + (state.tod() + 1) + " / 7");
-            fgProgress.addAction(Actions.scaleTo(state.progress(), 1, 0.3f));
-            if (state.isGameWon()) {
-                System.out.println("You won!");
+        container
+                .distinct(State::progress)
+                .listen(state -> fgProgress.addAction(Actions.scaleTo(state.progress(), 1, 0.3f)));
+        container.distinct(State::battery).listen(state -> battery.setText("Battery " + state.battery() + "%"));
+        container.distinct(State::day).listen(state -> day.setText("Day " + (state.day() + 1) + " / 7"));
+        container.distinct(State::tod).listen(state -> tod.setText("Time " + (state.tod() + 1) + " / 7"));
+        container.distinct(State::isGameWon).listen(state -> {
+            if (!state.isGameWon()) {
+                return;
             }
+            System.out.println("You won!");
         });
     }
 
