@@ -1,25 +1,26 @@
 package io.github.fourlastor.game.level;
 
-import com.badlogic.ashley.core.Engine;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import javax.inject.Inject;
 
 public class LevelScreen extends ScreenAdapter {
 
-    private final Engine engine;
-    private final Viewport viewport;
-    private final EntitiesFactory entitiesFactory;
+    public static Color CLEAR_COLOR = new Color(0x333333ff);
 
-    private final World world;
+    private final InputMultiplexer inputMultiplexer;
+    private final Viewport viewport;
+    private final Stage stage;
 
     @Inject
-    public LevelScreen(Engine engine, Viewport viewport, EntitiesFactory entitiesFactory, World world) {
-        this.engine = engine;
+    public LevelScreen(InputMultiplexer inputMultiplexer, Viewport viewport) {
+        this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
-        this.entitiesFactory = entitiesFactory;
-        this.world = world;
+        stage = new Stage(viewport);
     }
 
     @Override
@@ -29,23 +30,25 @@ public class LevelScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        engine.update(delta);
+        ScreenUtils.clear(CLEAR_COLOR, true);
+        stage.act(delta);
+        stage.getViewport().apply();
+        stage.draw();
     }
 
     @Override
     public void show() {
-        // entitiesFactory.create(...)
+        inputMultiplexer.addProcessor(stage);
     }
 
     @Override
     public void hide() {
-        engine.removeAllEntities();
-        engine.removeAllSystems();
+        inputMultiplexer.removeProcessor(stage);
     }
 
     @Override
     public void dispose() {
         super.dispose();
-        world.dispose();
+        stage.dispose();
     }
 }
