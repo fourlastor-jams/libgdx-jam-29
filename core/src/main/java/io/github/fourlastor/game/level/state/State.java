@@ -16,12 +16,18 @@ public abstract class State {
 
     public abstract float progress();
 
+    public abstract float deathSafety();
+
+    public abstract boolean deathAppeared();
+
     public static State initial() {
         return new AutoValue_State.Builder()
                 .tod(0)
                 .day(0)
                 .battery(100)
                 .progress(0)
+                .deathSafety(1f)
+                .deathAppeared(false)
                 .build();
     }
 
@@ -46,6 +52,10 @@ public abstract class State {
         }
 
         public abstract Builder progress(float value);
+
+        public abstract Builder deathSafety(float value);
+
+        public abstract Builder deathAppeared(boolean value);
 
         public abstract State build();
     }

@@ -11,7 +11,8 @@ public class IncreaseProgress extends AdvancesTime {
     private final float progress;
 
     @AssistedInject
-    public IncreaseProgress(@Assisted float progress) {
+    public IncreaseProgress(Dependencies dependencies, @Assisted float progress) {
+        super(dependencies);
         this.progress = progress;
     }
 

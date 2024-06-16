@@ -8,6 +8,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -72,7 +73,6 @@ public class LevelScreen extends ScreenAdapter {
         fgProgress.setScaleX(0);
         stage.addActor(fgProgress);
         Label progress = new Label("Progress (50%)", style);
-        Label charge = new Label("Charge", style);
         actions.addActor(progress);
         progress.addListener(new ClickListener() {
             @Override
@@ -88,6 +88,7 @@ public class LevelScreen extends ScreenAdapter {
                 actions.setVisible(false);
             }
         });
+        Label charge = new Label("Charge", style);
         charge.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -99,9 +100,20 @@ public class LevelScreen extends ScreenAdapter {
             }
         });
         actions.addActor(charge);
+        Label shineLight = new Label("Use light", style);
+        shineLight.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (container.current().battery() == 100) {
+                    return;
+                }
+                container.update(updates.shineLight);
+                actions.setVisible(false);
+            }
+        });
+        actions.addActor(shineLight);
         actions.setVisible(false);
         actions.setPosition(30, 75, Align.bottomLeft);
-        actions.setDebug(true);
         actions.align(Align.bottomLeft);
         stage.addActor(actions);
         Image character = new Image(whitePixel);
@@ -120,9 +132,13 @@ public class LevelScreen extends ScreenAdapter {
         Label battery = new Label("Battery", style);
         Label day = new Label("", style);
         Label tod = new Label("", style);
+        Label deathSafety = new Label("", style);
+        Label deathAppeared = new Label("", style);
         debugInfo.addActor(battery);
         debugInfo.addActor(day);
         debugInfo.addActor(tod);
+        debugInfo.addActor(deathSafety);
+        debugInfo.addActor(deathAppeared);
         stage.addActor(debugInfo);
 
         container
@@ -131,6 +147,12 @@ public class LevelScreen extends ScreenAdapter {
         container.distinct(State::battery).listen(state -> battery.setText("Battery " + state.battery() + "%"));
         container.distinct(State::day).listen(state -> day.setText("Day " + (state.day() + 1) + " / 7"));
         container.distinct(State::tod).listen(state -> tod.setText("Time " + (state.tod() + 1) + " / 7"));
+        container
+                .distinct(State::deathSafety)
+                .listen(state -> deathSafety.setText("Safety: " + MathUtils.round(state.deathSafety() * 100) + "%"));
+        container
+                .distinct(State::deathAppeared)
+                .listen(state -> deathAppeared.setText("Death appeared: " + state.deathAppeared()));
         container.distinct(State::isGameWon).listen(state -> {
             if (!state.isGameWon()) {
                 return;
