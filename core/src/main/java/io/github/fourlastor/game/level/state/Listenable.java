@@ -1,4 +1,4 @@
-package io.github.fourlastor.game.level;
+package io.github.fourlastor.game.level.state;
 
 import java.util.function.Consumer;
 

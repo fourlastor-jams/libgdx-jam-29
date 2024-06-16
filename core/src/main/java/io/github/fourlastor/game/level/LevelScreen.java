@@ -19,6 +19,9 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.github.tommyettinger.random.EnhancedRandom;
+import io.github.fourlastor.game.level.state.State;
+import io.github.fourlastor.game.level.state.StateContainer;
+import io.github.fourlastor.game.level.state.Updates;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -36,7 +39,8 @@ public class LevelScreen extends ScreenAdapter {
             InputMultiplexer inputMultiplexer,
             Viewport viewport,
             @Named(WHITE_PIXEL) TextureRegion whitePixel,
-            EnhancedRandom random) {
+            EnhancedRandom random,
+            Updates updates) {
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
         container = new StateContainer(State.initial());
@@ -77,9 +81,9 @@ public class LevelScreen extends ScreenAdapter {
                     return;
                 }
                 if (random.nextFloat(1f) < 0.8) {
-                    container.update(state -> state.increaseProgress(0.3f));
+                    container.update(updates.increaseProgress.create(0.3f));
                 } else {
-                    container.update(state -> state.increaseProgress(-0.3f));
+                    container.update(updates.increaseProgress.create(-0.3f));
                 }
                 actions.setVisible(false);
             }
@@ -90,7 +94,7 @@ public class LevelScreen extends ScreenAdapter {
                 if (container.current().battery() == 100) {
                     return;
                 }
-                container.update(State::chargeBattery);
+                container.update(updates.chargeBattery);
                 actions.setVisible(false);
             }
         });
