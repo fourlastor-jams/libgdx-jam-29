@@ -10,11 +10,17 @@ public abstract class Character {
 
     public abstract boolean kidnapped();
 
-    public static Character initial() {
-        return new AutoValue_Character.Builder().stress(0).kidnapped(false).build();
+    public abstract Name name();
+
+    public static Character initial(Name name) {
+        return new AutoValue_Character.Builder()
+                .name(name)
+                .stress(0)
+                .kidnapped(false)
+                .build();
     }
 
-    public enum Type {
+    public enum Name {
         RAELEUS,
         LYZE,
     }
@@ -25,6 +31,8 @@ public abstract class Character {
         public abstract Character.Builder stress(int value);
 
         public abstract Character.Builder kidnapped(boolean value);
+
+        public abstract Character.Builder name(Character.Name value);
 
         public abstract Character build();
     }

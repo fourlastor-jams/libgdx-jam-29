@@ -96,8 +96,8 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(progressTypes);
 
         stage.addActor(actions);
-        Image raeleus = createCharacter(whitePixel, 0, 0, actions, Character.Type.RAELEUS);
-        Image lyze = createCharacter(whitePixel, 40, 0, actions, Character.Type.LYZE);
+        Image raeleus = createCharacter(whitePixel, 0, 0, actions, Character.Name.RAELEUS);
+        Image lyze = createCharacter(whitePixel, 40, 0, actions, Character.Name.LYZE);
         stage.addActor(raeleus);
         stage.addActor(lyze);
 
@@ -154,14 +154,14 @@ public class LevelScreen extends ScreenAdapter {
     }
 
     private Image createCharacter(
-            TextureRegion whitePixel, float x, float y, ActionsContainer actions, Character.Type type) {
+            TextureRegion whitePixel, float x, float y, ActionsContainer actions, Character.Name name) {
         Image character = new Image(whitePixel);
         character.setSize(30, 75);
         character.setPosition(x, y);
         character.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float clickX, float clickY) {
-                actions.reveal(x + 30, y + 75, type);
+                actions.reveal(x + 30, y + 75, name);
             }
         });
         return character;

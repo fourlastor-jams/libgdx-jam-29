@@ -15,7 +15,7 @@ public class ActionsContainer extends VerticalGroup {
     private final StateContainer container;
     private final Updates updates;
     private final Label.LabelStyle style;
-    private Character.Type character;
+    private Character.Name character;
 
     public ActionsContainer(StateContainer container, Updates updates, Label.LabelStyle style) {
         super();
@@ -72,8 +72,8 @@ public class ActionsContainer extends VerticalGroup {
         });
     }
 
-    public void reveal(float x, float y, Character.Type type) {
-        this.character = type;
+    public void reveal(float x, float y, Character.Name name) {
+        this.character = name;
         setPosition(x, y);
         setVisible(true);
     }

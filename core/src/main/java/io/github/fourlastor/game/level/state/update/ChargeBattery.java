@@ -11,7 +11,7 @@ public class ChargeBattery extends AdvancesTime {
     }
 
     @Override
-    public State.Builder update(State state) {
-        return super.update(state).updateBattery(100);
+    public State apply(State state) {
+        return super.apply(state).builder().updateBattery(100).build();
     }
 }

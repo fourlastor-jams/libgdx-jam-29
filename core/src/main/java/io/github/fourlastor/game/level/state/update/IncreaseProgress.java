@@ -12,14 +12,14 @@ public class IncreaseProgress extends AdvancesTime {
 
     private final float progress;
     private final Progress.Type type;
-    private final Character.Type character;
+    private final Character.Name character;
 
     @AssistedInject
     public IncreaseProgress(
             Dependencies dependencies,
             @Assisted float progress,
             @Assisted Progress.Type type,
-            @Assisted Character.Type character) {
+            @Assisted Character.Name character) {
         super(dependencies);
         this.progress = progress;
         this.type = type;
@@ -27,7 +27,7 @@ public class IncreaseProgress extends AdvancesTime {
     }
 
     @Override
-    public State.Builder update(State state) {
+    public State apply(State state) {
         Progress currentProgress = state.progress();
         float total = MathUtils.clamp(currentProgress.total() + progress, 0, 1);
         Progress.Builder progressBuilder = currentProgress.builder().total(total);
@@ -46,7 +46,7 @@ public class IncreaseProgress extends AdvancesTime {
                 break;
         }
         Progress newProgress = progressBuilder.build();
-        State.Builder builder = super.update(state);
+        State.Builder builder = super.apply(state).builder();
 
         switch (character) {
             case RAELEUS:
@@ -59,11 +59,11 @@ public class IncreaseProgress extends AdvancesTime {
                 builder = builder.lyze(lyze.builder().stress(lyze.stress() + 10).build());
                 break;
         }
-        return builder.updateBattery(state.battery() - 30).progress(newProgress);
+        return builder.updateBattery(state.battery() - 30).progress(newProgress).build();
     }
 
     @AssistedFactory
     public interface Factory {
-        IncreaseProgress create(float progress, Progress.Type type, Character.Type character);
+        IncreaseProgress create(float progress, Progress.Type type, Character.Name character);
     }
 }

@@ -2,6 +2,9 @@ package io.github.fourlastor.game.level.state;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.google.auto.value.AutoValue;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @AutoValue
 public abstract class State {
@@ -24,6 +27,10 @@ public abstract class State {
 
     public abstract boolean deathAppeared();
 
+    public List<Character> availableCharacters() {
+        return Stream.of(raeleus(), lyze()).filter(it -> !it.kidnapped()).collect(Collectors.toList());
+    }
+
     public static State initial() {
         return new AutoValue_State.Builder()
                 .tod(0)
@@ -32,8 +39,8 @@ public abstract class State {
                 .progress(Progress.initial())
                 .deathSafety(100)
                 .deathAppeared(false)
-                .raeleus(Character.initial())
-                .lyze(Character.initial())
+                .raeleus(Character.initial(Character.Name.RAELEUS))
+                .lyze(Character.initial(Character.Name.LYZE))
                 .build();
     }
 

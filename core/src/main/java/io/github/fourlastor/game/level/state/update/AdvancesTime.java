@@ -2,6 +2,7 @@ package io.github.fourlastor.game.level.state.update;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.github.tommyettinger.random.EnhancedRandom;
+import io.github.fourlastor.game.level.state.Character;
 import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.Update;
 import javax.inject.Inject;
@@ -15,17 +16,29 @@ public abstract class AdvancesTime extends Update {
     }
 
     @Override
-    public State.Builder update(State state) {
+    public State apply(State state) {
         int tod = (state.tod() + 1) % 7;
         int day = tod == 0 ? state.day() + 1 : state.day();
         boolean deathAppeared = state.deathSafety() == 0;
         int deathSafety = deathAppeared ? 100 : MathUtils.clamp(state.deathSafety() - 20, 0, 100);
-        return state.builder()
+        State.Builder builder = state.builder()
                 .updateBattery(state.battery() - 10)
                 .day(day)
                 .tod(tod)
                 .deathSafety(deathSafety)
                 .deathAppeared(deathAppeared);
+        if (deathAppeared) {
+            Character character = random.randomElement(state.availableCharacters());
+            switch (character.name()) {
+                case RAELEUS:
+                    builder =
+                            builder.raeleus(character.builder().kidnapped(true).build());
+                case LYZE:
+                    builder = builder.lyze(character.builder().kidnapped(true).build());
+                    break;
+            }
+        }
+        return builder.build();
     }
 
     public static class Dependencies {
