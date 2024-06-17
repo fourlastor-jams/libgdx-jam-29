@@ -1,5 +1,6 @@
 package io.github.fourlastor.game.level.state.update;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.github.tommyettinger.random.EnhancedRandom;
 import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.Update;
@@ -17,8 +18,8 @@ public abstract class AdvancesTime extends Update {
     public State.Builder update(State state) {
         int tod = (state.tod() + 1) % 7;
         int day = tod == 0 ? state.day() + 1 : state.day();
-        boolean deathAppeared = random.nextBoolean(1 - state.deathSafety());
-        float deathSafety = deathAppeared ? 1f : state.deathSafety() * 0.9f;
+        boolean deathAppeared = state.deathSafety() == 0;
+        int deathSafety = deathAppeared ? 100 : MathUtils.clamp(state.deathSafety() - 20, 0, 100);
         return state.builder()
                 .updateBattery(state.battery() - 10)
                 .day(day)

@@ -12,6 +12,6 @@ public class ShineLight extends AdvancesTime {
 
     @Override
     public State.Builder update(State state) {
-        return super.update(state).deathSafety(1f).deathAppeared(false).updateBattery(state.battery() - 30);
+        return super.update(state).deathSafety(100).deathAppeared(false).updateBattery(state.battery() - 30);
     }
 }

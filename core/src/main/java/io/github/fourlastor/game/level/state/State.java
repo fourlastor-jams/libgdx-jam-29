@@ -8,15 +8,15 @@ public abstract class State {
 
     public abstract Builder builder();
 
+    public abstract Progress progress();
+
     public abstract int day();
 
     public abstract int tod();
 
     public abstract int battery();
 
-    public abstract float progress();
-
-    public abstract float deathSafety();
+    public abstract int deathSafety();
 
     public abstract boolean deathAppeared();
 
@@ -25,14 +25,14 @@ public abstract class State {
                 .tod(0)
                 .day(0)
                 .battery(100)
-                .progress(0)
-                .deathSafety(1f)
+                .progress(Progress.initial())
+                .deathSafety(100)
                 .deathAppeared(false)
                 .build();
     }
 
     public boolean isGameWon() {
-        return progress() == 1;
+        return progress().total() == 1;
     }
 
     public boolean enoughBattery(int required) {
@@ -51,9 +51,9 @@ public abstract class State {
             return battery(MathUtils.clamp(value, 0, 100));
         }
 
-        public abstract Builder progress(float value);
+        public abstract Builder progress(Progress value);
 
-        public abstract Builder deathSafety(float value);
+        public abstract Builder deathSafety(int value);
 
         public abstract Builder deathAppeared(boolean value);
 
