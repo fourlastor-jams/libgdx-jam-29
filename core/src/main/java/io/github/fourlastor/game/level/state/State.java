@@ -10,6 +10,10 @@ public abstract class State {
 
     public abstract Progress progress();
 
+    public abstract Character raeleus();
+
+    public abstract Character lyze();
+
     public abstract int day();
 
     public abstract int tod();
@@ -28,6 +32,8 @@ public abstract class State {
                 .progress(Progress.initial())
                 .deathSafety(100)
                 .deathAppeared(false)
+                .raeleus(Character.initial())
+                .lyze(Character.initial())
                 .build();
     }
 
@@ -56,6 +62,10 @@ public abstract class State {
         public abstract Builder deathSafety(int value);
 
         public abstract Builder deathAppeared(boolean value);
+
+        public abstract Builder raeleus(Character value);
+
+        public abstract Builder lyze(Character value);
 
         public abstract State build();
     }

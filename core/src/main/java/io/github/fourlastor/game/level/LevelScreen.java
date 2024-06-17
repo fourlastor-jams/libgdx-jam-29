@@ -19,10 +19,12 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.github.tommyettinger.random.EnhancedRandom;
+import io.github.fourlastor.game.level.state.Character;
 import io.github.fourlastor.game.level.state.Progress;
 import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.StateContainer;
 import io.github.fourlastor.game.level.state.Updates;
+import io.github.fourlastor.game.level.ui.ActionsContainer;
 import io.github.fourlastor.game.level.ui.ProgressBar;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -33,8 +35,12 @@ public class LevelScreen extends ScreenAdapter {
 
     private final InputMultiplexer inputMultiplexer;
     private final Viewport viewport;
+    private final TextureRegion whitePixel;
+    private final EnhancedRandom random;
+    private final Updates updates;
     private final Stage stage;
     private final StateContainer container;
+    private final Label.LabelStyle style;
 
     @Inject
     public LevelScreen(
@@ -45,22 +51,26 @@ public class LevelScreen extends ScreenAdapter {
             Updates updates) {
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
+        this.whitePixel = whitePixel;
+        this.random = random;
+        this.updates = updates;
         container = new StateContainer(State.initial());
         BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-16.fnt"));
-        Label.LabelStyle style = new Label.LabelStyle();
+        style = new Label.LabelStyle();
         style.font = font;
         stage = new Stage(viewport);
 
-        VerticalGroup actions = new VerticalGroup();
+        ActionsContainer actions = new ActionsContainer(container, updates, style);
         Image bg = new Image(whitePixel);
+        bg.setColor(new Color(0x333333ff));
+        bg.setSize(480, 270);
+
         bg.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 actions.setVisible(false);
             }
         });
-        bg.setColor(new Color(0x333333ff));
-        bg.setSize(480, 270);
         stage.addActor(bg);
         ProgressBar totalProgress = new ProgressBar(whitePixel);
         totalProgress.setSize(350, 40);
@@ -85,47 +95,11 @@ public class LevelScreen extends ScreenAdapter {
         progressTypes.setPosition(0, stage.getHeight() - 20);
         stage.addActor(progressTypes);
 
-        createProgress(random, updates, style, actions, Progress.Type.ART);
-        createProgress(random, updates, style, actions, Progress.Type.TECH);
-        createProgress(random, updates, style, actions, Progress.Type.STORY);
-        createProgress(random, updates, style, actions, Progress.Type.MECH);
-        Label charge = new Label("Charge", style);
-        charge.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (container.current().battery() == 100) {
-                    return;
-                }
-                container.update(updates.chargeBattery);
-                actions.setVisible(false);
-            }
-        });
-        actions.addActor(charge);
-        Label shineLight = new Label("Use light", style);
-        shineLight.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (container.current().battery() == 100) {
-                    return;
-                }
-                container.update(updates.shineLight);
-                actions.setVisible(false);
-            }
-        });
-        actions.addActor(shineLight);
-        actions.setVisible(false);
-        actions.setPosition(30, 75, Align.bottomLeft);
-        actions.align(Align.bottomLeft);
         stage.addActor(actions);
-        Image character = new Image(whitePixel);
-        character.setSize(30, 75);
-        character.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                actions.setVisible(true);
-            }
-        });
-        stage.addActor(character);
+        Image raeleus = createCharacter(whitePixel, 0, 0, actions, Character.Type.RAELEUS);
+        Image lyze = createCharacter(whitePixel, 40, 0, actions, Character.Type.LYZE);
+        stage.addActor(raeleus);
+        stage.addActor(lyze);
 
         VerticalGroup debugInfo = new VerticalGroup();
         debugInfo.align(Align.bottomRight);
@@ -135,11 +109,15 @@ public class LevelScreen extends ScreenAdapter {
         Label tod = new Label("", style);
         Label deathSafety = new Label("", style);
         Label deathAppeared = new Label("", style);
+        Label raeleusInfo = new Label("", style);
+        Label lyzeInfo = new Label("", style);
         debugInfo.addActor(battery);
         debugInfo.addActor(day);
         debugInfo.addActor(tod);
         debugInfo.addActor(deathSafety);
         debugInfo.addActor(deathAppeared);
+        debugInfo.addActor(raeleusInfo);
+        debugInfo.addActor(lyzeInfo);
         stage.addActor(debugInfo);
 
         container.distinct(State::progress).listen(state -> {
@@ -165,26 +143,28 @@ public class LevelScreen extends ScreenAdapter {
             }
             System.out.println("You won!");
         });
+        container.distinct(State::raeleus).listen(state -> {
+            Character character = state.raeleus();
+            raeleusInfo.setText("Raeleus: " + character.stress() + "% | " + character.kidnapped());
+        });
+        container.distinct(State::lyze).listen(state -> {
+            Character character = state.lyze();
+            lyzeInfo.setText("Lyze: " + character.stress() + "% | " + character.kidnapped());
+        });
     }
 
-    private void createProgress(
-            EnhancedRandom random, Updates updates, Label.LabelStyle style, VerticalGroup actions, Progress.Type type) {
-        Label progress = new Label(type.displayName, style);
-        actions.addActor(progress);
-        progress.addListener(new ClickListener() {
+    private Image createCharacter(
+            TextureRegion whitePixel, float x, float y, ActionsContainer actions, Character.Type type) {
+        Image character = new Image(whitePixel);
+        character.setSize(30, 75);
+        character.setPosition(x, y);
+        character.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (container.current().enoughBattery(30)) {
-                    return;
-                }
-                if (random.nextFloat(1f) < 0.8) {
-                    container.update(updates.increaseProgress.create(0.3f, type));
-                } else {
-                    container.update(updates.increaseProgress.create(-0.3f, type));
-                }
-                actions.setVisible(false);
+            public void clicked(InputEvent event, float clickX, float clickY) {
+                actions.reveal(x + 30, y + 75, type);
             }
         });
+        return character;
     }
 
     @Override
