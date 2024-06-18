@@ -9,12 +9,15 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -73,41 +76,43 @@ public class LevelScreen extends ScreenAdapter {
 
         ActionsContainer actions = new ActionsContainer(container, updates, style);
         Image bg = new Image(atlas.findRegion("environment/background"));
-        bg.setSize(480, 270);
-        bg.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                actions.setVisible(false);
-            }
-        });
         stage.addActor(bg);
 
         stage.addActor(new Image(atlas.findRegion("environment/wall-2")));
         stage.addActor(new Image(atlas.findRegion("environment/wall-1")));
         stage.addActor(new Image(atlas.findRegion("environment/floor")));
 
+        Actor hideActionsClickTarget = new Actor();
+        hideActionsClickTarget.setSize(480, 270);
+        hideActionsClickTarget.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                actions.setVisible(false);
+            }
+        });
+        stage.addActor(hideActionsClickTarget);
+
         ProgressBar totalProgress = new ProgressBar(whitePixel);
-        totalProgress.setSize(350, 40);
-        totalProgress.setPosition(stage.getWidth() / 2, stage.getHeight() / 2, Align.center);
+        totalProgress.setSize(133, 8);
+        totalProgress.setPosition(159, 183);
         stage.addActor(totalProgress);
 
-        HorizontalGroup progressTypes = new HorizontalGroup();
-        //        progressTypes.setSize(350, 20);
-        ProgressBar artProgress = new ProgressBar(whitePixel, Color.GREEN);
-        artProgress.setSize(87, 20);
-        progressTypes.addActor(artProgress);
-        ProgressBar techProgress = new ProgressBar(whitePixel, Color.RED);
-        techProgress.setSize(87, 20);
-        progressTypes.addActor(techProgress);
-        ProgressBar storyProgress = new ProgressBar(whitePixel, Color.BLUE);
-        storyProgress.setSize(87, 20);
-        progressTypes.addActor(storyProgress);
-        ProgressBar mechProgress = new ProgressBar(whitePixel, Color.BROWN);
-        mechProgress.setSize(87, 20);
-        progressTypes.addActor(mechProgress);
-        progressTypes.space(10);
-        progressTypes.setPosition(0, stage.getHeight() - 20);
-        stage.addActor(progressTypes);
+        ProgressBar artProgress = new ProgressBar(whitePixel);
+        artProgress.setSize(44, 3);
+        artProgress.setPosition(274, 168);
+        stage.addActor(artProgress);
+        ProgressBar techProgress = new ProgressBar(whitePixel);
+        techProgress.setSize(44, 3);
+        techProgress.setPosition(274, 159);
+        stage.addActor(techProgress);
+        ProgressBar storyProgress = new ProgressBar(whitePixel);
+        storyProgress.setSize(44, 3);
+        storyProgress.setPosition(274, 150);
+        stage.addActor(storyProgress);
+        ProgressBar mechProgress = new ProgressBar(whitePixel);
+        mechProgress.setSize(44, 3);
+        mechProgress.setPosition(274, 141);
+        stage.addActor(mechProgress);
 
         stage.addActor(actions);
         AnimatedImage raeleus = createCharacter(atlas.findRegions("character/raeleus/idle"), 228, 14, actions, Character.Name.RAELEUS);
