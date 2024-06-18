@@ -54,6 +54,18 @@ public class ActionsContainer extends VerticalGroup {
             }
         });
         addActor(shineLight);
+        Label petCat = new Label("Pet cat", style);
+        petCat.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (character == null) {
+                    return;
+                }
+                container.update(updates.petCat.create(character));
+                setVisible(false);
+            }
+        });
+        addActor(petCat);
     }
 
     private void createProgress(Progress.Type type) {
