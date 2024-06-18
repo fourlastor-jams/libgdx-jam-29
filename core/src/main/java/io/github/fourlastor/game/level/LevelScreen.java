@@ -7,6 +7,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -15,7 +16,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.github.tommyettinger.random.EnhancedRandom;
@@ -26,6 +30,10 @@ import io.github.fourlastor.game.level.state.StateContainer;
 import io.github.fourlastor.game.level.state.Updates;
 import io.github.fourlastor.game.level.ui.ActionsContainer;
 import io.github.fourlastor.game.level.ui.ProgressBar;
+import io.github.fourlastor.harlequin.animation.Animation;
+import io.github.fourlastor.harlequin.animation.FixedFrameAnimation;
+import io.github.fourlastor.harlequin.ui.AnimatedImage;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -48,23 +56,24 @@ public class LevelScreen extends ScreenAdapter {
             Viewport viewport,
             @Named(WHITE_PIXEL) TextureRegion whitePixel,
             EnhancedRandom random,
-            Updates updates) {
+            Updates updates,
+            TextureAtlas atlas) {
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
         this.whitePixel = whitePixel;
         this.random = random;
         this.updates = updates;
+
         container = new StateContainer(State.initial());
         BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-16.fnt"));
         style = new Label.LabelStyle();
         style.font = font;
         stage = new Stage(viewport);
+        stage.addActor(new Image(atlas.findRegion("environment/universe")));
 
         ActionsContainer actions = new ActionsContainer(container, updates, style);
-        Image bg = new Image(whitePixel);
-        bg.setColor(new Color(0x333333ff));
+        Image bg = new Image(atlas.findRegion("environment/background"));
         bg.setSize(480, 270);
-
         bg.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -72,6 +81,11 @@ public class LevelScreen extends ScreenAdapter {
             }
         });
         stage.addActor(bg);
+
+        stage.addActor(new Image(atlas.findRegion("environment/wall-2")));
+        stage.addActor(new Image(atlas.findRegion("environment/wall-1")));
+        stage.addActor(new Image(atlas.findRegion("environment/floor")));
+
         ProgressBar totalProgress = new ProgressBar(whitePixel);
         totalProgress.setSize(350, 40);
         totalProgress.setPosition(stage.getWidth() / 2, stage.getHeight() / 2, Align.center);
@@ -96,8 +110,8 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(progressTypes);
 
         stage.addActor(actions);
-        Image raeleus = createCharacter(whitePixel, 0, 0, actions, Character.Name.RAELEUS);
-        Image lyze = createCharacter(whitePixel, 40, 0, actions, Character.Name.LYZE);
+        AnimatedImage raeleus = createCharacter(atlas.findRegions("character/raeleus/idle"), 228, 14, actions, Character.Name.RAELEUS);
+        Image lyze = createCharacter(atlas.findRegions("character/lyze/idle"), 192, 14, actions, Character.Name.LYZE);
         stage.addActor(raeleus);
         stage.addActor(lyze);
 
@@ -153,9 +167,14 @@ public class LevelScreen extends ScreenAdapter {
         });
     }
 
-    private Image createCharacter(
-            TextureRegion whitePixel, float x, float y, ActionsContainer actions, Character.Name name) {
-        Image character = new Image(whitePixel);
+    private AnimatedImage createCharacter(
+            Array<? extends TextureRegion> regions, float x, float y, ActionsContainer actions, Character.Name name) {
+        Array<Drawable> frames = new Array<>(regions.size);
+        for (TextureRegion region : regions) {
+            frames.add(new TextureRegionDrawable(region));
+        }
+        FixedFrameAnimation<Drawable> animation = new FixedFrameAnimation<>(0.2f, frames, Animation.PlayMode.LOOP);
+        AnimatedImage character = new AnimatedImage(animation);
         character.setSize(30, 75);
         character.setPosition(x, y);
         character.addListener(new ClickListener() {
