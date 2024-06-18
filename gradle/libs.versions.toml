@@ -1,5 +1,6 @@
 [versions]
 ashley = "1.7.4"
+autovalue = "1.11.0"
 controllers = "2.2.1"
 dagger = "2.49"
 download-plugin = "5.3.0"
@@ -16,12 +17,15 @@ shadow = "7.1.2"
 spotless = "6.10.0"
 perceptual = "1.0.0"
 tommyettinger-funderby = "0.1.1"
-tommyettinger-digital = "0.4.5"
+tommyettinger-digital = "0.4.8"
 tommyettinger-jdkgdxds = "1.4.5"
+tommyettinger-juniper = "0.6.1"
 tommyettinger-regexodus = "0.1.15"
 tommyettinger-textratypist = "0.10.0"
 [libraries]
 ashley = { module = "com.badlogicgames.ashley:ashley", version.ref = "ashley" }
+autovalue-annotations = { module = "com.google.auto.value:auto-value-annotations", version.ref = "autovalue" }
+autovalue-processor = { module = "com.google.auto.value:auto-value", version.ref = "autovalue" }
 dagger-core = { module = "com.google.dagger:dagger", version.ref = "dagger"}
 dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger"}
 dagger-gwt = { module = "com.google.dagger:dagger-gwt", version.ref = "dagger"}
@@ -45,6 +49,7 @@ perceptual = { module = "io.github.fourlastor.gdx:perceptual", version.ref = "pe
 tommyettinger-funderby = { module = "com.github.tommyettinger:funderby", version.ref = "tommyettinger-funderby"}
 tommyettinger-digital = { module = "com.github.tommyettinger:digital", version.ref = "tommyettinger-digital"}
 tommyettinger-jdkgdxds = { module = "com.github.tommyettinger:jdkgdxds", version.ref = "tommyettinger-jdkgdxds"}
+tommyettinger-juniper = { module = "com.github.tommyettinger:juniper", version.ref = "tommyettinger-juniper"}
 tommyettinger-regexodus = { module = "com.github.tommyettinger:regexodus", version.ref = "tommyettinger-regexodus" }
 tommyettinger-textratypist = { module = "com.github.tommyettinger:textratypist", version.ref = "tommyettinger-textratypist" }
 [plugins]

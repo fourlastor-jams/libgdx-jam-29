@@ -12,6 +12,7 @@
 	<inherits name="com.github.tommyettinger.funderby" />
 	<inherits name="com.github.tommyettinger.digital" />
 	<inherits name="com.github.tommyettinger.jdkgdxds" />
+	<inherits name="com.github.tommyettinger.juniper" />
 
 	<inherits name="io.github.fourlastor.GdxGame" />
 	<inherits name="io.github.fourlastor.Harlequin" />
