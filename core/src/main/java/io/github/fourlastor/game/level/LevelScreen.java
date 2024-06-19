@@ -90,8 +90,7 @@ public class LevelScreen extends ScreenAdapter {
         });
         stage.addActor(hideActionsClickTarget);
 
-        ProgressBar totalProgress = new ProgressBar(whitePixel, new Color(0x262b44ff));
-        //        totalProgress.setAlign(Align.right);
+        ProgressBar totalProgress = new ProgressBar(whitePixel, new Color(0x262b44ff), -1f);
         totalProgress.setSize(133, 8);
         totalProgress.setPosition(159 + totalProgress.getWidth(), 183);
         stage.addActor(totalProgress);
