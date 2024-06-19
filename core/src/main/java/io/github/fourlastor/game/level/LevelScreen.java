@@ -5,6 +5,8 @@ import static io.github.fourlastor.game.di.modules.AssetsModule.WHITE_PIXEL;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -22,7 +24,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.github.tommyettinger.random.EnhancedRandom;
+import io.github.fourlastor.game.di.modules.AssetsModule;
 import io.github.fourlastor.game.level.state.Character;
 import io.github.fourlastor.game.level.state.Progress;
 import io.github.fourlastor.game.level.state.State;
@@ -42,27 +44,24 @@ public class LevelScreen extends ScreenAdapter {
 
     private final InputMultiplexer inputMultiplexer;
     private final Viewport viewport;
-    private final TextureRegion whitePixel;
-    private final EnhancedRandom random;
-    private final Updates updates;
     private final Stage stage;
     private final StateContainer container;
     private final Label.LabelStyle style;
+    private final Music music;
 
     @Inject
     public LevelScreen(
             InputMultiplexer inputMultiplexer,
             Viewport viewport,
             @Named(WHITE_PIXEL) TextureRegion whitePixel,
-            EnhancedRandom random,
             Updates updates,
-            TextureAtlas atlas) {
+            TextureAtlas atlas,
+            AssetManager assetManager) {
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
-        this.whitePixel = whitePixel;
-        this.random = random;
-        this.updates = updates;
-
+        music = assetManager.get(AssetsModule.PATH_MUSIC);
+        music.setVolume(0f);
+        music.setLooping(true);
         container = new StateContainer(State.initial());
         BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-8.fnt"));
         style = new Label.LabelStyle();
@@ -219,10 +218,12 @@ public class LevelScreen extends ScreenAdapter {
     @Override
     public void show() {
         inputMultiplexer.addProcessor(stage);
+        music.play();
     }
 
     @Override
     public void hide() {
+        music.stop();
         inputMultiplexer.removeProcessor(stage);
     }
 
