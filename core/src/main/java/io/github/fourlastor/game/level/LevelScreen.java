@@ -12,12 +12,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -36,7 +33,6 @@ import io.github.fourlastor.game.level.ui.ProgressBar;
 import io.github.fourlastor.harlequin.animation.Animation;
 import io.github.fourlastor.harlequin.animation.FixedFrameAnimation;
 import io.github.fourlastor.harlequin.ui.AnimatedImage;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -68,13 +64,15 @@ public class LevelScreen extends ScreenAdapter {
         this.updates = updates;
 
         container = new StateContainer(State.initial());
-        BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-16.fnt"));
+        BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-8.fnt"));
         style = new Label.LabelStyle();
         style.font = font;
+        Label.LabelStyle hoverStyle = new Label.LabelStyle(style);
+        hoverStyle.background = new TextureRegionDrawable(whitePixel).tint(new Color(0xff0044ff));
         stage = new Stage(viewport);
         stage.addActor(new Image(atlas.findRegion("environment/universe")));
 
-        ActionsContainer actions = new ActionsContainer(container, updates, style);
+        ActionsContainer actions = new ActionsContainer(container, updates, style, hoverStyle);
         Image bg = new Image(atlas.findRegion("environment/background"));
         stage.addActor(bg);
 
@@ -115,22 +113,24 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(mechProgress);
 
         stage.addActor(actions);
-        AnimatedImage raeleus = createCharacter(atlas.findRegions("character/raeleus/idle"), 228, 14, actions, Character.Name.RAELEUS);
+        AnimatedImage raeleus =
+                createCharacter(atlas.findRegions("character/raeleus/idle"), 228, 14, actions, Character.Name.RAELEUS);
         Image lyze = createCharacter(atlas.findRegions("character/lyze/idle"), 192, 14, actions, Character.Name.LYZE);
         stage.addActor(raeleus);
         stage.addActor(lyze);
 
         VerticalGroup debugInfo = new VerticalGroup();
         debugInfo.align(Align.bottomRight);
+        debugInfo.columnAlign(Align.left);
         debugInfo.setPosition(stage.getWidth(), 0, Align.bottomRight);
-        Label battery = new Label("Battery", style);
+        Label batteryInfo = new Label("Battery", style);
         Label day = new Label("", style);
         Label tod = new Label("", style);
         Label deathSafety = new Label("", style);
         Label deathAppeared = new Label("", style);
         Label raeleusInfo = new Label("", style);
         Label lyzeInfo = new Label("", style);
-        debugInfo.addActor(battery);
+        debugInfo.addActor(batteryInfo);
         debugInfo.addActor(day);
         debugInfo.addActor(tod);
         debugInfo.addActor(deathSafety);
@@ -138,6 +138,15 @@ public class LevelScreen extends ScreenAdapter {
         debugInfo.addActor(raeleusInfo);
         debugInfo.addActor(lyzeInfo);
         stage.addActor(debugInfo);
+        Array<TextureAtlas.AtlasRegion> batteryRegions = atlas.findRegions("environment/battery/battery");
+        Array<Drawable> drawables = new Array<>(batteryRegions.size);
+        for (TextureRegion region : batteryRegions) {
+            drawables.add(new TextureRegionDrawable(region));
+        }
+        AnimatedImage battery = new AnimatedImage(new FixedFrameAnimation<>(1, drawables));
+        battery.setPosition(345, 23);
+        battery.setPlaying(false);
+        stage.addActor(battery);
 
         container.distinct(State::progress).listen(state -> {
             Progress progress = state.progress();
@@ -147,7 +156,10 @@ public class LevelScreen extends ScreenAdapter {
             storyProgress.setProgress(progress.storyProgress());
             techProgress.setProgress(progress.techProgress());
         });
-        container.distinct(State::battery).listen(state -> battery.setText("Battery " + state.battery() + "%"));
+        container.distinct(State::battery).listen(state -> {
+            battery.setProgress(state.battery() / 10);
+            batteryInfo.setText("Battery " + state.battery() + "%");
+        });
         container.distinct(State::day).listen(state -> day.setText("Day " + (state.day() + 1) + " / 7"));
         container.distinct(State::tod).listen(state -> tod.setText("Time " + (state.tod() + 1) + " / 7"));
         container
