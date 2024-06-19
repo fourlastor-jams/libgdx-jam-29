@@ -90,9 +90,10 @@ public class LevelScreen extends ScreenAdapter {
         });
         stage.addActor(hideActionsClickTarget);
 
-        ProgressBar totalProgress = new ProgressBar(whitePixel);
+        ProgressBar totalProgress = new ProgressBar(whitePixel, new Color(0x262b44ff));
+        //        totalProgress.setAlign(Align.right);
         totalProgress.setSize(133, 8);
-        totalProgress.setPosition(159, 183);
+        totalProgress.setPosition(159 + totalProgress.getWidth(), 183);
         stage.addActor(totalProgress);
 
         ProgressBar artProgress = new ProgressBar(whitePixel);
@@ -150,7 +151,7 @@ public class LevelScreen extends ScreenAdapter {
 
         container.distinct(State::progress).listen(state -> {
             Progress progress = state.progress();
-            totalProgress.setProgress(progress.total());
+            totalProgress.setProgress(-1 * (1 - progress.total()));
             artProgress.setProgress(progress.artProgress());
             mechProgress.setProgress(progress.mechProgress());
             storyProgress.setProgress(progress.storyProgress());
