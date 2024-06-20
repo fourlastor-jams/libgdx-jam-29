@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.github.tommyettinger.random.EnhancedRandom;
 import io.github.fourlastor.game.di.modules.AssetsModule;
 import io.github.fourlastor.game.level.state.Character;
 import io.github.fourlastor.game.level.state.Progress;
@@ -43,6 +44,7 @@ public class LevelScreen extends ScreenAdapter {
     public static Color CLEAR_COLOR = Color.BLACK;
 
     private final InputMultiplexer inputMultiplexer;
+    private final EnhancedRandom random;
     private final Viewport viewport;
     private final Stage stage;
     private final StateContainer container;
@@ -56,9 +58,11 @@ public class LevelScreen extends ScreenAdapter {
             @Named(WHITE_PIXEL) TextureRegion whitePixel,
             Updates updates,
             TextureAtlas atlas,
+            EnhancedRandom random,
             AssetManager assetManager) {
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
+        this.random = random;
         music = assetManager.get(AssetsModule.PATH_MUSIC);
         music.setVolume(0f);
         music.setLooping(true);
@@ -115,8 +119,14 @@ public class LevelScreen extends ScreenAdapter {
         AnimatedImage raeleus =
                 createCharacter(atlas.findRegions("character/raeleus/idle"), 228, 14, actions, Character.Name.RAELEUS);
         Image lyze = createCharacter(atlas.findRegions("character/lyze/idle"), 192, 14, actions, Character.Name.LYZE);
+        Image dragonQueen = createCharacter(
+                atlas.findRegions("character/dragon_queen/idle"), 152, 16, actions, Character.Name.DRAGON_QUEEN);
+        Image panda = createCharacter(
+                atlas.findRegions("character/peanut_panda/idle"), 121, 10, actions, Character.Name.PANDA);
         stage.addActor(raeleus);
         stage.addActor(lyze);
+        stage.addActor(dragonQueen);
+        stage.addActor(panda);
 
         VerticalGroup debugInfo = new VerticalGroup();
         debugInfo.align(Align.bottomRight);
@@ -193,6 +203,7 @@ public class LevelScreen extends ScreenAdapter {
         AnimatedImage character = new AnimatedImage(animation);
         character.setSize(30, 75);
         character.setPosition(x, y);
+        character.setProgress(random.nextFloat(1f));
         character.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float clickX, float clickY) {
