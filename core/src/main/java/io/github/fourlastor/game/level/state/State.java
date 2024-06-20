@@ -3,6 +3,7 @@ package io.github.fourlastor.game.level.state;
 import com.badlogic.gdx.math.MathUtils;
 import com.google.auto.value.AutoValue;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,6 +70,16 @@ public abstract class State {
         public abstract Builder deathSafety(int value);
 
         public abstract Builder deathAppeared(boolean value);
+
+        public Builder character(Character.Name name, State state, Function<Character, Character> update) {
+            switch (name) {
+                case RAELEUS:
+                    return raeleus(update.apply(state.raeleus()));
+                case LYZE:
+                    return lyze(update.apply(state.lyze()));
+            }
+            throw new IllegalArgumentException("Character " + name + " is unmanaged");
+        }
 
         public abstract Builder raeleus(Character value);
 
