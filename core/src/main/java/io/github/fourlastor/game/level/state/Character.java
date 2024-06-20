@@ -23,6 +23,8 @@ public abstract class Character {
     public enum Name {
         RAELEUS,
         LYZE,
+        DRAGON_QUEEN,
+        PANDA,
     }
 
     @AutoValue.Builder

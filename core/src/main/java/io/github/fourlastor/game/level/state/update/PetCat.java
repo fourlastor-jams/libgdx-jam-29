@@ -19,23 +19,12 @@ public class PetCat extends AdvancesTime {
 
     @Override
     public State apply(State state) {
-        State.Builder builder = super.apply(state).builder();
-
-        switch (character) {
-            case RAELEUS:
-                Character raeleus = state.raeleus();
-                builder = builder.raeleus(raeleus.builder()
-                        .stress(MathUtils.clamp(raeleus.stress() - 20, 0, 100))
-                        .build());
-                break;
-            case LYZE:
-                Character lyze = state.lyze();
-                builder = builder.lyze(lyze.builder()
-                        .stress(MathUtils.clamp(lyze.stress() - 20, 0, 100))
-                        .build());
-                break;
-        }
-        return builder.build();
+        return super.apply(state)
+                .builder()
+                .character(character, state, it -> it.builder()
+                        .stress(MathUtils.clamp(it.stress() - 20, 0, 100))
+                        .build())
+                .build();
     }
 
     @AssistedFactory

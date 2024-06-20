@@ -46,20 +46,14 @@ public class IncreaseProgress extends AdvancesTime {
                 break;
         }
         Progress newProgress = progressBuilder.build();
-        State.Builder builder = super.apply(state).builder();
-
-        switch (character) {
-            case RAELEUS:
-                Character raeleus = state.raeleus();
-                builder = builder.raeleus(
-                        raeleus.builder().stress(raeleus.stress() + 10).build());
-                break;
-            case LYZE:
-                Character lyze = state.lyze();
-                builder = builder.lyze(lyze.builder().stress(lyze.stress() + 10).build());
-                break;
-        }
-        return builder.updateBattery(state.battery() - 30).progress(newProgress).build();
+        return super.apply(state)
+                .builder()
+                .character(character, state, it -> it.builder()
+                        .stress(it.stress() + 10)
+                        .build())
+                .updateBattery(state.battery() - 30)
+                .progress(newProgress)
+                .build();
     }
 
     @AssistedFactory

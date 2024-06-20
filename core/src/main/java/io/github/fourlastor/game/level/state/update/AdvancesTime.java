@@ -29,14 +29,8 @@ public abstract class AdvancesTime extends Update {
                 .deathAppeared(deathAppeared);
         if (deathAppeared) {
             Character character = random.randomElement(state.availableCharacters());
-            switch (character.name()) {
-                case RAELEUS:
-                    builder =
-                            builder.raeleus(character.builder().kidnapped(true).build());
-                case LYZE:
-                    builder = builder.lyze(character.builder().kidnapped(true).build());
-                    break;
-            }
+            builder = builder.character(
+                    character.name(), state, it -> it.builder().kidnapped(true).build());
         }
         return builder.build();
     }
