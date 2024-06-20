@@ -5,20 +5,38 @@ import static io.github.fourlastor.game.di.modules.AssetsModule.WHITE_PIXEL;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.github.tommyettinger.random.EnhancedRandom;
+import io.github.fourlastor.game.di.modules.AssetsModule;
+import io.github.fourlastor.game.level.state.Character;
+import io.github.fourlastor.game.level.state.Progress;
+import io.github.fourlastor.game.level.state.State;
+import io.github.fourlastor.game.level.state.StateContainer;
+import io.github.fourlastor.game.level.state.Updates;
+import io.github.fourlastor.game.level.ui.ActionsContainer;
+import io.github.fourlastor.game.level.ui.CharacterImage;
+import io.github.fourlastor.game.level.ui.ProgressBar;
+import io.github.fourlastor.harlequin.animation.Animation;
+import io.github.fourlastor.harlequin.animation.FixedFrameAnimation;
+import io.github.fourlastor.harlequin.ui.AnimatedImage;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -27,112 +45,190 @@ public class LevelScreen extends ScreenAdapter {
     public static Color CLEAR_COLOR = Color.BLACK;
 
     private final InputMultiplexer inputMultiplexer;
+    private final TextureAtlas atlas;
+    private final EnhancedRandom random;
     private final Viewport viewport;
     private final Stage stage;
     private final StateContainer container;
+    private final Label.LabelStyle style;
+    private final Music music;
 
     @Inject
     public LevelScreen(
             InputMultiplexer inputMultiplexer,
             Viewport viewport,
             @Named(WHITE_PIXEL) TextureRegion whitePixel,
-            EnhancedRandom random) {
+            Updates updates,
+            TextureAtlas atlas,
+            EnhancedRandom random,
+            AssetManager assetManager) {
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
+        this.atlas = atlas;
+        this.random = random;
+        music = assetManager.get(AssetsModule.PATH_MUSIC);
+        music.setVolume(0f);
+        music.setLooping(true);
         container = new StateContainer(State.initial());
-        BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-16.fnt"));
-        Label.LabelStyle style = new Label.LabelStyle();
+        BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-8.fnt"));
+        style = new Label.LabelStyle();
         style.font = font;
+        Label.LabelStyle hoverStyle = new Label.LabelStyle(style);
+        hoverStyle.background = new TextureRegionDrawable(whitePixel).tint(new Color(0xff0044ff));
         stage = new Stage(viewport);
+        stage.addActor(new Image(atlas.findRegion("environment/universe")));
 
-        VerticalGroup actions = new VerticalGroup();
-        Image bg = new Image(whitePixel);
-        bg.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                actions.setVisible(false);
-            }
-        });
-        bg.setColor(new Color(0x333333ff));
-        bg.setSize(480, 270);
+        ActionsContainer actions = new ActionsContainer(container, updates, style, hoverStyle);
+        Image bg = new Image(atlas.findRegion("environment/background"));
         stage.addActor(bg);
-        Image bgProgress = new Image(whitePixel);
-        bgProgress.setSize(360, 50);
-        bgProgress.setColor(Color.LIGHT_GRAY);
-        bgProgress.setPosition(stage.getWidth() / 2, stage.getHeight() / 2, Align.center);
-        stage.addActor(bgProgress);
-        Image fgProgress = new Image(whitePixel);
-        fgProgress.setSize(350, 40);
-        fgProgress.setColor(Color.CORAL);
-        fgProgress.setPosition(stage.getWidth() / 2, stage.getHeight() / 2, Align.center);
-        fgProgress.setScaleX(0);
-        stage.addActor(fgProgress);
-        Label progress = new Label("Progress (50%)", style);
-        Label charge = new Label("Charge", style);
-        actions.addActor(progress);
-        progress.addListener(new ClickListener() {
+
+        stage.addActor(new Image(atlas.findRegion("environment/wall-2")));
+        stage.addActor(new Image(atlas.findRegion("environment/wall-1")));
+        stage.addActor(new Image(atlas.findRegion("environment/floor")));
+
+        Actor hideActionsClickTarget = new Actor();
+        hideActionsClickTarget.setSize(480, 270);
+        hideActionsClickTarget.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (container.current().enoughBattery(30)) {
-                    return;
-                }
-                if (random.nextFloat(1f) < 0.8) {
-                    container.update(state -> state.increaseProgress(0.3f));
-                } else {
-                    container.update(state -> state.increaseProgress(-0.3f));
-                }
                 actions.setVisible(false);
             }
         });
-        charge.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (container.current().battery() == 100) {
-                    return;
-                }
-                container.update(State::chargeBattery);
-                actions.setVisible(false);
-            }
-        });
-        actions.addActor(charge);
-        actions.setVisible(false);
-        actions.setPosition(30, 75, Align.bottomLeft);
-        actions.setDebug(true);
-        actions.align(Align.bottomLeft);
+        stage.addActor(hideActionsClickTarget);
+
+        ProgressBar totalProgress = new ProgressBar(whitePixel, new Color(0x262b44ff), -1f);
+        totalProgress.setSize(133, 8);
+        totalProgress.setPosition(159 + totalProgress.getWidth(), 183);
+        stage.addActor(totalProgress);
+
+        ProgressBar artProgress = new ProgressBar(whitePixel);
+        artProgress.setSize(44, 3);
+        artProgress.setPosition(274, 168);
+        stage.addActor(artProgress);
+        ProgressBar techProgress = new ProgressBar(whitePixel);
+        techProgress.setSize(44, 3);
+        techProgress.setPosition(274, 159);
+        stage.addActor(techProgress);
+        ProgressBar storyProgress = new ProgressBar(whitePixel);
+        storyProgress.setSize(44, 3);
+        storyProgress.setPosition(274, 150);
+        stage.addActor(storyProgress);
+        ProgressBar mechProgress = new ProgressBar(whitePixel);
+        mechProgress.setSize(44, 3);
+        mechProgress.setPosition(274, 141);
+        stage.addActor(mechProgress);
+
         stage.addActor(actions);
-        Image character = new Image(whitePixel);
-        character.setSize(30, 75);
-        character.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                actions.setVisible(true);
-            }
-        });
-        stage.addActor(character);
+        CharacterImage raeleus = createCharacter(228, 14, actions, Character.Name.RAELEUS);
+        CharacterImage lyze = createCharacter(192, 14, actions, Character.Name.LYZE);
+        CharacterImage dragonQueen = createCharacter(152, 16, actions, Character.Name.DRAGON_QUEEN);
+        CharacterImage panda = createCharacter(121, 10, actions, Character.Name.PANDA);
+        stage.addActor(raeleus);
+        stage.addActor(lyze);
+        stage.addActor(dragonQueen);
+        stage.addActor(panda);
 
         VerticalGroup debugInfo = new VerticalGroup();
         debugInfo.align(Align.bottomRight);
+        debugInfo.columnAlign(Align.left);
         debugInfo.setPosition(stage.getWidth(), 0, Align.bottomRight);
-        Label battery = new Label("Battery", style);
+        Label batteryInfo = new Label("Battery", style);
         Label day = new Label("", style);
         Label tod = new Label("", style);
-        debugInfo.addActor(battery);
+        Label deathSafety = new Label("", style);
+        Label deathAppeared = new Label("", style);
+        Label raeleusInfo = new Label("", style);
+        Label lyzeInfo = new Label("", style);
+        debugInfo.addActor(batteryInfo);
         debugInfo.addActor(day);
         debugInfo.addActor(tod);
+        debugInfo.addActor(deathSafety);
+        debugInfo.addActor(deathAppeared);
+        debugInfo.addActor(raeleusInfo);
+        debugInfo.addActor(lyzeInfo);
         stage.addActor(debugInfo);
+        Array<TextureAtlas.AtlasRegion> batteryRegions = atlas.findRegions("environment/battery/battery");
+        Array<Drawable> drawables = new Array<>(batteryRegions.size);
+        for (TextureRegion region : batteryRegions) {
+            drawables.add(new TextureRegionDrawable(region));
+        }
+        AnimatedImage battery = new AnimatedImage(new FixedFrameAnimation<>(1, drawables));
+        battery.setPosition(345, 23);
+        battery.setPlaying(false);
+        stage.addActor(battery);
 
-        container
-                .distinct(State::progress)
-                .listen(state -> fgProgress.addAction(Actions.scaleTo(state.progress(), 1, 0.3f)));
-        container.distinct(State::battery).listen(state -> battery.setText("Battery " + state.battery() + "%"));
+        container.distinct(State::progress).listen(state -> {
+            Progress progress = state.progress();
+            totalProgress.setProgress(-1 * (1 - progress.total()));
+            artProgress.setProgress(progress.artProgress());
+            mechProgress.setProgress(progress.mechProgress());
+            storyProgress.setProgress(progress.storyProgress());
+            techProgress.setProgress(progress.techProgress());
+        });
+        container.distinct(State::battery).listen(state -> {
+            battery.setProgress(state.battery() / 10);
+            batteryInfo.setText("Battery " + state.battery() + "%");
+        });
         container.distinct(State::day).listen(state -> day.setText("Day " + (state.day() + 1) + " / 7"));
         container.distinct(State::tod).listen(state -> tod.setText("Time " + (state.tod() + 1) + " / 7"));
+        container
+                .distinct(State::deathSafety)
+                .listen(state -> deathSafety.setText("Safety: " + state.deathSafety() + "%"));
+        container
+                .distinct(State::deathAppeared)
+                .listen(state -> deathAppeared.setText("Death appeared: " + state.deathAppeared()));
         container.distinct(State::isGameWon).listen(state -> {
             if (!state.isGameWon()) {
                 return;
             }
             System.out.println("You won!");
         });
+        container.distinct(State::raeleus).listen(state -> {
+            Character character = state.raeleus();
+            raeleusInfo.setText("Raeleus: " + character.stress() + "% | " + character.kidnapped());
+            raeleus.updateStress(character.stress());
+        });
+        container.distinct(State::lyze).listen(state -> {
+            Character character = state.lyze();
+            lyzeInfo.setText("Lyze: " + character.stress() + "% | " + character.kidnapped());
+            lyze.updateStress(character.stress());
+        });
+        container.distinct(State::dragonQueen).listen(state -> {
+            Character character = state.dragonQueen();
+            dragonQueen.updateStress(character.stress());
+        });
+        container.distinct(State::panda).listen(state -> {
+            Character character = state.panda();
+            panda.updateStress(character.stress());
+        });
+    }
+
+    private CharacterImage createCharacter(float x, float y, ActionsContainer actions, Character.Name name) {
+        Animation<Drawable> idle0 = idleAnimation(name, 0);
+        Animation<Drawable> idle25 = idleAnimation(name, 25);
+        Animation<Drawable> idle50 = idleAnimation(name, 50);
+        Animation<Drawable> idle100 = idleAnimation(name, 100);
+        CharacterImage character = new CharacterImage(idle0, idle25, idle50, idle100);
+        character.setSize(30, 75);
+        character.setPosition(x, y);
+        character.setProgress(random.nextFloat(1f));
+        character.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float clickX, float clickY) {
+                actions.reveal(x + 30, y + 75, name);
+            }
+        });
+        return character;
+    }
+
+    private Animation<Drawable> idleAnimation(Character.Name name, int stress) {
+        Array<? extends TextureAtlas.AtlasRegion> regions =
+                atlas.findRegions("character/" + name.folder + "/idle-stress-" + stress);
+        Array<Drawable> frames = new Array<>(regions.size);
+        for (TextureRegion region : regions) {
+            frames.add(new TextureRegionDrawable(region));
+        }
+        return new FixedFrameAnimation<>(0.2f, frames, Animation.PlayMode.LOOP);
     }
 
     @Override
@@ -151,10 +247,12 @@ public class LevelScreen extends ScreenAdapter {
     @Override
     public void show() {
         inputMultiplexer.addProcessor(stage);
+        music.play();
     }
 
     @Override
     public void hide() {
+        music.stop();
         inputMultiplexer.removeProcessor(stage);
     }
 
