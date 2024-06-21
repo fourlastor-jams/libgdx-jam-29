@@ -32,6 +32,7 @@ import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.StateContainer;
 import io.github.fourlastor.game.level.state.Updates;
 import io.github.fourlastor.game.level.ui.ActionsContainer;
+import io.github.fourlastor.game.level.ui.CharacterImage;
 import io.github.fourlastor.game.level.ui.ProgressBar;
 import io.github.fourlastor.harlequin.animation.Animation;
 import io.github.fourlastor.harlequin.animation.FixedFrameAnimation;
@@ -44,6 +45,7 @@ public class LevelScreen extends ScreenAdapter {
     public static Color CLEAR_COLOR = Color.BLACK;
 
     private final InputMultiplexer inputMultiplexer;
+    private final TextureAtlas atlas;
     private final EnhancedRandom random;
     private final Viewport viewport;
     private final Stage stage;
@@ -62,6 +64,7 @@ public class LevelScreen extends ScreenAdapter {
             AssetManager assetManager) {
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
+        this.atlas = atlas;
         this.random = random;
         music = assetManager.get(AssetsModule.PATH_MUSIC);
         music.setVolume(0f);
@@ -116,13 +119,10 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(mechProgress);
 
         stage.addActor(actions);
-        AnimatedImage raeleus =
-                createCharacter(atlas.findRegions("character/raeleus/idle"), 228, 14, actions, Character.Name.RAELEUS);
-        Image lyze = createCharacter(atlas.findRegions("character/lyze/idle"), 192, 14, actions, Character.Name.LYZE);
-        Image dragonQueen = createCharacter(
-                atlas.findRegions("character/dragon_queen/idle"), 152, 16, actions, Character.Name.DRAGON_QUEEN);
-        Image panda = createCharacter(
-                atlas.findRegions("character/peanut_panda/idle"), 121, 10, actions, Character.Name.PANDA);
+        CharacterImage raeleus = createCharacter(228, 14, actions, Character.Name.RAELEUS);
+        CharacterImage lyze = createCharacter(192, 14, actions, Character.Name.LYZE);
+        CharacterImage dragonQueen = createCharacter(152, 16, actions, Character.Name.DRAGON_QUEEN);
+        CharacterImage panda = createCharacter(121, 10, actions, Character.Name.PANDA);
         stage.addActor(raeleus);
         stage.addActor(lyze);
         stage.addActor(dragonQueen);
@@ -186,21 +186,29 @@ public class LevelScreen extends ScreenAdapter {
         container.distinct(State::raeleus).listen(state -> {
             Character character = state.raeleus();
             raeleusInfo.setText("Raeleus: " + character.stress() + "% | " + character.kidnapped());
+            raeleus.updateStress(character.stress());
         });
         container.distinct(State::lyze).listen(state -> {
             Character character = state.lyze();
             lyzeInfo.setText("Lyze: " + character.stress() + "% | " + character.kidnapped());
+            lyze.updateStress(character.stress());
+        });
+        container.distinct(State::dragonQueen).listen(state -> {
+            Character character = state.dragonQueen();
+            dragonQueen.updateStress(character.stress());
+        });
+        container.distinct(State::panda).listen(state -> {
+            Character character = state.panda();
+            panda.updateStress(character.stress());
         });
     }
 
-    private AnimatedImage createCharacter(
-            Array<? extends TextureRegion> regions, float x, float y, ActionsContainer actions, Character.Name name) {
-        Array<Drawable> frames = new Array<>(regions.size);
-        for (TextureRegion region : regions) {
-            frames.add(new TextureRegionDrawable(region));
-        }
-        FixedFrameAnimation<Drawable> animation = new FixedFrameAnimation<>(0.2f, frames, Animation.PlayMode.LOOP);
-        AnimatedImage character = new AnimatedImage(animation);
+    private CharacterImage createCharacter(float x, float y, ActionsContainer actions, Character.Name name) {
+        Animation<Drawable> idle0 = idleAnimation(name, 0);
+        Animation<Drawable> idle25 = idleAnimation(name, 25);
+        Animation<Drawable> idle50 = idleAnimation(name, 50);
+        Animation<Drawable> idle100 = idleAnimation(name, 100);
+        CharacterImage character = new CharacterImage(idle0, idle25, idle50, idle100);
         character.setSize(30, 75);
         character.setPosition(x, y);
         character.setProgress(random.nextFloat(1f));
@@ -211,6 +219,16 @@ public class LevelScreen extends ScreenAdapter {
             }
         });
         return character;
+    }
+
+    private Animation<Drawable> idleAnimation(Character.Name name, int stress) {
+        Array<? extends TextureAtlas.AtlasRegion> regions =
+                atlas.findRegions("character/" + name.folder + "/idle-stress-" + stress);
+        Array<Drawable> frames = new Array<>(regions.size);
+        for (TextureRegion region : regions) {
+            frames.add(new TextureRegionDrawable(region));
+        }
+        return new FixedFrameAnimation<>(0.2f, frames, Animation.PlayMode.LOOP);
     }
 
     @Override

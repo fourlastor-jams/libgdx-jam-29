@@ -21,10 +21,16 @@ public abstract class Character {
     }
 
     public enum Name {
-        RAELEUS,
-        LYZE,
-        DRAGON_QUEEN,
-        PANDA,
+        RAELEUS("raeleus"),
+        LYZE("lyze"),
+        DRAGON_QUEEN("dragon_queen"),
+        PANDA("peanut_panda");
+
+        public final String folder;
+
+        Name(String folder) {
+            this.folder = folder;
+        }
     }
 
     @AutoValue.Builder
