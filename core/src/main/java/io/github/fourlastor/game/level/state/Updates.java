@@ -9,14 +9,14 @@ import javax.inject.Inject;
 public class Updates {
     public final IncreaseProgress.Factory increaseProgress;
     public final PetCat.Factory petCat;
-    public final ChargeBattery chargeBattery;
+    public final ChargeBattery.Factory chargeBattery;
     public final ShineLight shineLight;
 
     @Inject
     public Updates(
             IncreaseProgress.Factory increaseProgress,
             PetCat.Factory petCat,
-            ChargeBattery chargeBattery,
+            ChargeBattery.Factory chargeBattery,
             ShineLight shineLight) {
         this.increaseProgress = increaseProgress;
         this.petCat = petCat;
