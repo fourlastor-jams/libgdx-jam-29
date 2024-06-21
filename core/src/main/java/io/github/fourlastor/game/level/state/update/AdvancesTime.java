@@ -4,10 +4,12 @@ import com.badlogic.gdx.math.MathUtils;
 import com.github.tommyettinger.random.EnhancedRandom;
 import io.github.fourlastor.game.level.state.CatStance;
 import io.github.fourlastor.game.level.state.Character;
+import io.github.fourlastor.game.level.state.Progress;
 import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.Update;
-import javax.inject.Inject;
 import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 
 public abstract class AdvancesTime extends Update {
 
@@ -34,6 +36,30 @@ public abstract class AdvancesTime extends Update {
             Character character = random.randomElement(availableCharacters);
             builder = builder.character(
                     character.name(), state, it -> it.builder().kidnapped(true).build());
+        }
+        for (Character character : availableCharacters) {
+            int stress = character.stress();
+            System.out.println(character.name() + " is stressed: " + character.stress());
+            float chance = stress / 100f;
+            System.out.println("Chance: " + chance);
+            if (stress > 50 && random.nextBoolean(chance)) {
+                List<Character> otherCharacters = availableCharacters.stream()
+                        .filter(it -> it.name() != character.name())
+                        .collect(Collectors.toList());
+                if (!otherCharacters.isEmpty() && random.nextBoolean()) {
+                    Character other = random.randomElement(otherCharacters);
+                    System.out.println("Stressing " + other.name());
+                    builder = builder.character(other.name(), state, it -> it.builder()
+                            .stress(it.stress() + 5)
+                            .build());
+                } else {
+                    System.out.println("Reducing progress..");
+                    Progress progress = state.progress();
+                    builder = builder.progress(progress.builder()
+                            .updateTotal(progress.total() - 0.1f)
+                            .build());
+                }
+            }
         }
         return builder.catStance(random.randomElement(CatStance.values())).build();
     }
