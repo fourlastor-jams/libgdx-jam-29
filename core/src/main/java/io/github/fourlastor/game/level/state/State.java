@@ -22,6 +22,8 @@ public abstract class State {
 
     public abstract Character panda();
 
+    public abstract CatStance catStance();
+
     public abstract int day();
 
     public abstract int tod();
@@ -50,6 +52,7 @@ public abstract class State {
                 .lyze(Character.initial(Character.Name.LYZE))
                 .dragonQueen(Character.initial(Character.Name.DRAGON_QUEEN))
                 .panda(Character.initial(Character.Name.PANDA))
+                .catStance(CatStance.IDLE_STANDING)
                 .build();
     }
 
@@ -100,6 +103,8 @@ public abstract class State {
         public abstract Builder dragonQueen(Character value);
 
         public abstract Builder panda(Character value);
+
+        public abstract Builder catStance(CatStance value);
 
         public abstract State build();
     }

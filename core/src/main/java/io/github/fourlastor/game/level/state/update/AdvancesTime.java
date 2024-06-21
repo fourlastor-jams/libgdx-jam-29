@@ -2,6 +2,7 @@ package io.github.fourlastor.game.level.state.update;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.github.tommyettinger.random.EnhancedRandom;
+import io.github.fourlastor.game.level.state.CatStance;
 import io.github.fourlastor.game.level.state.Character;
 import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.Update;
@@ -32,7 +33,7 @@ public abstract class AdvancesTime extends Update {
             builder = builder.character(
                     character.name(), state, it -> it.builder().kidnapped(true).build());
         }
-        return builder.build();
+        return builder.catStance(random.randomElement(CatStance.values())).build();
     }
 
     public static class Dependencies {
