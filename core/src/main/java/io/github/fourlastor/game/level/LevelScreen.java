@@ -186,7 +186,7 @@ public class LevelScreen extends ScreenAdapter {
             if (!state.isGameWon()) {
                 return;
             }
-            System.out.println("You won!");
+            Gdx.app.log("Win condition", "You won!");
         });
         container.distinct(State::raeleus).listen(state -> {
             Character character = state.raeleus();
