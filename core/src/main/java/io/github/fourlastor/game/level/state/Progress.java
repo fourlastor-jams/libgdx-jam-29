@@ -1,5 +1,6 @@
 package io.github.fourlastor.game.level.state;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
@@ -62,15 +63,19 @@ public abstract class Progress {
     @AutoValue.Builder
     public abstract static class Builder {
 
-        public abstract Progress.Builder total(float value);
+        public Builder updateTotal(float value) {
+            return total(MathUtils.clamp(value, 0, 1));
+        }
 
-        public abstract Progress.Builder art(float value);
+        protected abstract Builder total(float value);
 
-        public abstract Progress.Builder tech(float value);
+        public abstract Builder art(float value);
 
-        public abstract Progress.Builder story(float value);
+        public abstract Builder tech(float value);
 
-        public abstract Progress.Builder mech(float value);
+        public abstract Builder story(float value);
+
+        public abstract Builder mech(float value);
 
         public abstract Progress build();
     }

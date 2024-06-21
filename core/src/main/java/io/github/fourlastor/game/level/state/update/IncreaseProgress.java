@@ -1,6 +1,5 @@
 package io.github.fourlastor.game.level.state.update;
 
-import com.badlogic.gdx.math.MathUtils;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -29,20 +28,20 @@ public class IncreaseProgress extends AdvancesTime {
     @Override
     public State apply(State state) {
         Progress currentProgress = state.progress();
-        float total = MathUtils.clamp(currentProgress.total() + progress, 0, 1);
-        Progress.Builder progressBuilder = currentProgress.builder().total(total);
+        float total = currentProgress.total() + progress;
+        Progress.Builder progressBuilder = currentProgress.builder().updateTotal(total);
         switch (type) {
             case ART:
-                progressBuilder = progressBuilder.art(currentProgress.art() + 30);
+                progressBuilder = progressBuilder.art(currentProgress.art() + 1);
                 break;
             case TECH:
-                progressBuilder = progressBuilder.tech(currentProgress.tech() + 30);
+                progressBuilder = progressBuilder.tech(currentProgress.tech() + 1);
                 break;
             case STORY:
-                progressBuilder = progressBuilder.story(currentProgress.story() + 30);
+                progressBuilder = progressBuilder.story(currentProgress.story() + 1);
                 break;
             case MECH:
-                progressBuilder = progressBuilder.mech(currentProgress.mech() + 30);
+                progressBuilder = progressBuilder.mech(currentProgress.mech() + 1);
                 break;
         }
         Progress newProgress = progressBuilder.build();

@@ -32,6 +32,7 @@ import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.StateContainer;
 import io.github.fourlastor.game.level.state.Updates;
 import io.github.fourlastor.game.level.ui.ActionsContainer;
+import io.github.fourlastor.game.level.ui.CatImage;
 import io.github.fourlastor.game.level.ui.CharacterImage;
 import io.github.fourlastor.game.level.ui.ProgressBar;
 import io.github.fourlastor.harlequin.animation.Animation;
@@ -157,6 +158,10 @@ public class LevelScreen extends ScreenAdapter {
         battery.setPlaying(false);
         stage.addActor(battery);
 
+        CatImage cat = cat();
+        cat.setPosition(96, 10);
+        stage.addActor(cat);
+
         container.distinct(State::progress).listen(state -> {
             Progress progress = state.progress();
             totalProgress.setProgress(-1 * (1 - progress.total()));
@@ -181,7 +186,7 @@ public class LevelScreen extends ScreenAdapter {
             if (!state.isGameWon()) {
                 return;
             }
-            System.out.println("You won!");
+            Gdx.app.log("Win condition", "You won!");
         });
         container.distinct(State::raeleus).listen(state -> {
             Character character = state.raeleus();
@@ -201,6 +206,27 @@ public class LevelScreen extends ScreenAdapter {
             Character character = state.panda();
             panda.updateStress(character.stress());
         });
+        container.distinct(State::catStance).listen(state -> {
+            cat.updateStance(state.catStance());
+        });
+    }
+
+    private CatImage cat() {
+        Animation<Drawable> idleStanding = catAnimation("idle-standing");
+        Animation<Drawable> idleSitting = catAnimation("idle-sitting");
+        Animation<Drawable> walking = catAnimation("walking");
+        Animation<Drawable> hissing = catAnimation("hissing");
+        return new CatImage(idleStanding, idleSitting, walking, hissing);
+    }
+
+    private Animation<Drawable> catAnimation(String stance) {
+        Array<TextureAtlas.AtlasRegion> regions = atlas.findRegions("environment/cat/" + stance);
+        Array<Drawable> drawables = new Array<>(regions.size);
+        for (TextureAtlas.AtlasRegion region : regions) {
+            drawables.add(new TextureRegionDrawable(region));
+        }
+        Animation<Drawable> animation = new FixedFrameAnimation<>(0.2f, drawables, Animation.PlayMode.LOOP);
+        return animation;
     }
 
     private CharacterImage createCharacter(float x, float y, ActionsContainer actions, Character.Name name) {
