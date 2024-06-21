@@ -38,6 +38,8 @@ import io.github.fourlastor.game.level.ui.ProgressBar;
 import io.github.fourlastor.harlequin.animation.Animation;
 import io.github.fourlastor.harlequin.animation.FixedFrameAnimation;
 import io.github.fourlastor.harlequin.ui.AnimatedImage;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -120,10 +122,10 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(mechProgress);
 
         stage.addActor(actions);
-        CharacterImage raeleus = createCharacter(228, 14, actions, Character.Name.RAELEUS);
-        CharacterImage lyze = createCharacter(192, 14, actions, Character.Name.LYZE);
-        CharacterImage dragonQueen = createCharacter(152, 16, actions, Character.Name.DRAGON_QUEEN);
-        CharacterImage panda = createCharacter(121, 10, actions, Character.Name.PANDA);
+        CharacterImage raeleus = createCharacter(actions, Character.Name.RAELEUS);
+        CharacterImage lyze = createCharacter(actions, Character.Name.LYZE);
+        CharacterImage dragonQueen = createCharacter(actions, Character.Name.DRAGON_QUEEN);
+        CharacterImage panda = createCharacter(actions, Character.Name.PANDA);
         stage.addActor(raeleus);
         stage.addActor(lyze);
         stage.addActor(dragonQueen);
@@ -138,15 +140,11 @@ public class LevelScreen extends ScreenAdapter {
         Label tod = new Label("", style);
         Label deathSafety = new Label("", style);
         Label deathAppeared = new Label("", style);
-        Label raeleusInfo = new Label("", style);
-        Label lyzeInfo = new Label("", style);
         debugInfo.addActor(batteryInfo);
         debugInfo.addActor(day);
         debugInfo.addActor(tod);
         debugInfo.addActor(deathSafety);
         debugInfo.addActor(deathAppeared);
-        debugInfo.addActor(raeleusInfo);
-        debugInfo.addActor(lyzeInfo);
         stage.addActor(debugInfo);
         Array<TextureAtlas.AtlasRegion> batteryRegions = atlas.findRegions("environment/battery/battery");
         Array<Drawable> drawables = new Array<>(batteryRegions.size);
@@ -188,27 +186,24 @@ public class LevelScreen extends ScreenAdapter {
             }
             Gdx.app.log("Win condition", "You won!");
         });
-        container.distinct(State::raeleus).listen(state -> {
-            Character character = state.raeleus();
-            raeleusInfo.setText("Raeleus: " + character.stress() + "% | " + character.kidnapped());
-            raeleus.updateStress(character.stress());
-        });
-        container.distinct(State::lyze).listen(state -> {
-            Character character = state.lyze();
-            lyzeInfo.setText("Lyze: " + character.stress() + "% | " + character.kidnapped());
-            lyze.updateStress(character.stress());
-        });
-        container.distinct(State::dragonQueen).listen(state -> {
-            Character character = state.dragonQueen();
-            dragonQueen.updateStress(character.stress());
-        });
-        container.distinct(State::panda).listen(state -> {
-            Character character = state.panda();
-            panda.updateStress(character.stress());
-        });
+        container.distinct(State::raeleus).listen(onCharacterChange(raeleus, State::raeleus));
+        container.distinct(State::lyze).listen(onCharacterChange(lyze, State::lyze));
+        container.distinct(State::dragonQueen).listen(onCharacterChange(dragonQueen, State::dragonQueen));
+        container.distinct(State::panda).listen(onCharacterChange(panda, State::panda));
         container.distinct(State::catStance).listen(state -> {
             cat.updateStance(state.catStance());
         });
+    }
+
+    private Consumer<State> onCharacterChange(CharacterImage characterImage, Function<State, Character> selector) {
+        return state -> {
+            Character character = selector.apply(state);
+            if (character.cycling()) {
+                characterImage.setCycling();
+            } else {
+                characterImage.updateStress(character.stress());
+            }
+        };
     }
 
     private CatImage cat() {
@@ -219,29 +214,33 @@ public class LevelScreen extends ScreenAdapter {
         return new CatImage(idleStanding, idleSitting, walking, hissing);
     }
 
-    private Animation<Drawable> catAnimation(String stance) {
-        Array<TextureAtlas.AtlasRegion> regions = atlas.findRegions("environment/cat/" + stance);
+    private Animation<Drawable> toAnimation(Array<? extends TextureRegion> regions, float frameDuration) {
         Array<Drawable> drawables = new Array<>(regions.size);
-        for (TextureAtlas.AtlasRegion region : regions) {
+        for (TextureRegion region : regions) {
             drawables.add(new TextureRegionDrawable(region));
         }
-        Animation<Drawable> animation = new FixedFrameAnimation<>(0.2f, drawables, Animation.PlayMode.LOOP);
-        return animation;
+        return new FixedFrameAnimation<>(frameDuration, drawables, Animation.PlayMode.LOOP);
     }
 
-    private CharacterImage createCharacter(float x, float y, ActionsContainer actions, Character.Name name) {
+    private Animation<Drawable> catAnimation(String stance) {
+        Array<TextureAtlas.AtlasRegion> regions = atlas.findRegions("environment/cat/" + stance);
+        return toAnimation(regions, 0.2f);
+    }
+
+    private CharacterImage createCharacter(ActionsContainer actions, Character.Name name) {
         Animation<Drawable> idle0 = idleAnimation(name, 0);
         Animation<Drawable> idle25 = idleAnimation(name, 25);
         Animation<Drawable> idle50 = idleAnimation(name, 50);
         Animation<Drawable> idle100 = idleAnimation(name, 100);
-        CharacterImage character = new CharacterImage(idle0, idle25, idle50, idle100);
-        character.setSize(30, 75);
-        character.setPosition(x, y);
+        Animation<Drawable> cycle = toAnimation(atlas.findRegions("character/" + name.folder + "/cycle"), 0.2f);
+        CharacterImage character =
+                new CharacterImage(idle0, idle25, idle50, idle100, cycle, name.idlePos, name.cyclePos);
+        character.setPosition(name.idlePos.x, name.idlePos.y);
         character.setProgress(random.nextFloat(1f));
         character.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float clickX, float clickY) {
-                actions.reveal(x + 30, y + 75, name);
+                actions.reveal(character.getX() + 30, character.getY() + 75, name);
             }
         });
         return character;
@@ -250,11 +249,7 @@ public class LevelScreen extends ScreenAdapter {
     private Animation<Drawable> idleAnimation(Character.Name name, int stress) {
         Array<? extends TextureAtlas.AtlasRegion> regions =
                 atlas.findRegions("character/" + name.folder + "/idle-stress-" + stress);
-        Array<Drawable> frames = new Array<>(regions.size);
-        for (TextureRegion region : regions) {
-            frames.add(new TextureRegionDrawable(region));
-        }
-        return new FixedFrameAnimation<>(0.2f, frames, Animation.PlayMode.LOOP);
+        return toAnimation(regions, 0.2f);
     }
 
     @Override

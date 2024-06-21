@@ -34,6 +34,10 @@ public abstract class AdvancesTime extends Update {
                 .deathSafety(deathSafety)
                 .deathAppeared(deathAppeared);
         List<Character> availableCharacters = state.availableCharacters();
+        for (Character character : availableCharacters) {
+            builder = builder.character(
+                    character.name(), state, it -> it.builder().cycling(false).build());
+        }
         if (deathAppeared && !availableCharacters.isEmpty()) {
             Character character = random.randomElement(availableCharacters);
             builder = builder.character(

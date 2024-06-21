@@ -37,10 +37,10 @@ public class ActionsContainer extends VerticalGroup {
         addActor(createProgress(Progress.Type.STORY));
         addActor(createProgress(Progress.Type.MECH));
         addActor(createAction("Charge", () -> {
-            if (container.current().battery() == 100) {
+            if (container.current().battery() == 100 || character == null) {
                 return;
             }
-            container.update(updates.chargeBattery);
+            container.update(updates.chargeBattery.create(character));
         }));
         addActor(createAction("Use light", () -> {
             if (container.current().battery() < 30) {
