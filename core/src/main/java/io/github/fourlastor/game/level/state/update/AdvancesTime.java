@@ -7,6 +7,7 @@ import io.github.fourlastor.game.level.state.Character;
 import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.Update;
 import javax.inject.Inject;
+import java.util.List;
 
 public abstract class AdvancesTime extends Update {
 
@@ -28,8 +29,9 @@ public abstract class AdvancesTime extends Update {
                 .tod(tod)
                 .deathSafety(deathSafety)
                 .deathAppeared(deathAppeared);
-        if (deathAppeared) {
-            Character character = random.randomElement(state.availableCharacters());
+        List<Character> availableCharacters = state.availableCharacters();
+        if (deathAppeared && !availableCharacters.isEmpty()) {
+            Character character = random.randomElement(availableCharacters);
             builder = builder.character(
                     character.name(), state, it -> it.builder().kidnapped(true).build());
         }
