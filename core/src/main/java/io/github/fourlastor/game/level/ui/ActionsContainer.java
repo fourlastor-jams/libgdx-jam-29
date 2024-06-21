@@ -9,24 +9,19 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Null;
 import io.github.fourlastor.game.level.state.Character;
 import io.github.fourlastor.game.level.state.Progress;
-import io.github.fourlastor.game.level.state.StateContainer;
-import io.github.fourlastor.game.level.state.Updates;
 
 public class ActionsContainer extends VerticalGroup {
 
-    private final StateContainer container;
-    private final Updates updates;
     private final Label.LabelStyle style;
     private final Label.LabelStyle hoverStyle;
+    private final Listener listener;
     private Character.Name character;
 
-    public ActionsContainer(
-            StateContainer container, Updates updates, Label.LabelStyle style, Label.LabelStyle hoverStyle) {
+    public ActionsContainer(Label.LabelStyle style, Label.LabelStyle hoverStyle, Listener listener) {
         super();
-        this.container = container;
-        this.updates = updates;
         this.style = style;
         this.hoverStyle = hoverStyle;
+        this.listener = listener;
 
         setVisible(false);
         align(Align.bottomLeft);
@@ -36,34 +31,33 @@ public class ActionsContainer extends VerticalGroup {
         addActor(createProgress(Progress.Type.TECH));
         addActor(createProgress(Progress.Type.STORY));
         addActor(createProgress(Progress.Type.MECH));
-        addActor(createAction("Charge", () -> {
-            if (container.current().battery() == 100 || character == null) {
-                return;
-            }
-            container.update(updates.chargeBattery.create(character));
-        }));
-        addActor(createAction("Use light", () -> {
-            if (container.current().battery() < 30) {
-                return;
-            }
-            container.update(updates.shineLight);
-        }));
+        addActor(createAction("Charge", () -> listener.charge(character)));
+        addActor(createAction("Use light", listener::light));
         addActor(createAction("Pet cat", () -> {
             if (character == null) {
                 return;
             }
-            container.update(updates.petCat.create(character));
+            listener.cat(character);
         }));
     }
 
     private Label createProgress(Progress.Type type) {
         return createAction(type.displayName, () -> {
-            if (container.current().enoughBattery(30) || character == null) {
+            if (character == null) {
                 return;
             }
-
-            container.update(updates.increaseProgress.create(0.05f, type, character));
+            listener.progress(character, type);
         });
+    }
+
+    public interface Listener {
+        void progress(Character.Name name, Progress.Type type);
+
+        void charge(Character.Name name);
+
+        void light();
+
+        void cat(Character.Name name);
     }
 
     private Label createAction(String displayName, Runnable onClick) {
