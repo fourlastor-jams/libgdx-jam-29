@@ -48,6 +48,7 @@ public class LevelScreen extends ScreenAdapter {
     public static Color CLEAR_COLOR = Color.BLACK;
 
     private final InputMultiplexer inputMultiplexer;
+    private final Updates updates;
     private final TextureAtlas atlas;
     private final EnhancedRandom random;
     private final Viewport viewport;
@@ -67,6 +68,7 @@ public class LevelScreen extends ScreenAdapter {
             AssetManager assetManager) {
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
+        this.updates = updates;
         this.atlas = atlas;
         this.random = random;
         music = assetManager.get(AssetsModule.PATH_MUSIC);
@@ -81,7 +83,7 @@ public class LevelScreen extends ScreenAdapter {
         stage = new Stage(viewport);
         stage.addActor(new Image(atlas.findRegion("environment/universe")));
 
-        ActionsContainer actions = new ActionsContainer(container, updates, style, hoverStyle);
+        ActionsContainer actions = new ActionsContainer(style, hoverStyle, listener());
         Image bg = new Image(atlas.findRegion("environment/background"));
         stage.addActor(bg);
 
@@ -193,6 +195,39 @@ public class LevelScreen extends ScreenAdapter {
         container.distinct(State::catStance).listen(state -> {
             cat.updateStance(state.catStance());
         });
+    }
+
+    private ActionsContainer.Listener listener() {
+        return new ActionsContainer.Listener() {
+            @Override
+            public void progress(Character.Name name, Progress.Type type) {
+                if (container.current().enoughBattery(30)) {
+                    return;
+                }
+                container.update(updates.increaseProgress.create(0.05f, type, name));
+            }
+
+            @Override
+            public void charge(Character.Name name) {
+                if (container.current().battery() == 100) {
+                    return;
+                }
+                container.update(updates.chargeBattery.create(name));
+            }
+
+            @Override
+            public void light() {
+                if (container.current().battery() < 30) {
+                    return;
+                }
+                container.update(updates.shineLight);
+            }
+
+            @Override
+            public void cat(Character.Name name) {
+                container.update(updates.petCat.create(name));
+            }
+        };
     }
 
     private Consumer<State> onCharacterChange(CharacterImage characterImage, Function<State, Character> selector) {
