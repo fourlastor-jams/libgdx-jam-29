@@ -68,7 +68,7 @@ public class LevelScreen extends ScreenAdapter {
         this.atlas = atlas;
         this.random = random;
         music = assetManager.get(AssetsModule.PATH_MUSIC);
-        music.setVolume(0f);
+        music.setVolume(0.1f);
         music.setLooping(true);
         container = new StateContainer(State.initial());
         BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-8.fnt"));
