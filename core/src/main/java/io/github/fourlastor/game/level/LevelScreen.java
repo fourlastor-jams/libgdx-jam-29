@@ -28,6 +28,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.github.tommyettinger.random.EnhancedRandom;
 import io.github.fourlastor.game.di.modules.AssetsModule;
+import io.github.fourlastor.game.end.EndState;
 import io.github.fourlastor.game.level.state.Character;
 import io.github.fourlastor.game.level.state.Progress;
 import io.github.fourlastor.game.level.state.State;
@@ -37,6 +38,7 @@ import io.github.fourlastor.game.level.ui.ActionsContainer;
 import io.github.fourlastor.game.level.ui.CatImage;
 import io.github.fourlastor.game.level.ui.CharacterImage;
 import io.github.fourlastor.game.level.ui.ProgressBar;
+import io.github.fourlastor.game.route.Router;
 import io.github.fourlastor.harlequin.animation.Animation;
 import io.github.fourlastor.harlequin.animation.FixedFrameAnimation;
 import io.github.fourlastor.harlequin.ui.AnimatedImage;
@@ -49,6 +51,7 @@ public class LevelScreen extends ScreenAdapter {
 
     public static Color CLEAR_COLOR = Color.BLACK;
 
+    private final Router router;
     private final InputMultiplexer inputMultiplexer;
     private final Updates updates;
     private final TextureAtlas atlas;
@@ -59,9 +62,11 @@ public class LevelScreen extends ScreenAdapter {
     private final Label.LabelStyle style;
     private final Music music;
     private final Image fadeInOut;
+    private final BitmapFont font;
 
     @Inject
     public LevelScreen(
+            Router router,
             InputMultiplexer inputMultiplexer,
             Viewport viewport,
             @Named(WHITE_PIXEL) TextureRegion whitePixel,
@@ -69,6 +74,7 @@ public class LevelScreen extends ScreenAdapter {
             TextureAtlas atlas,
             EnhancedRandom random,
             AssetManager assetManager) {
+        this.router = router;
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
         this.updates = updates;
@@ -78,7 +84,7 @@ public class LevelScreen extends ScreenAdapter {
         music.setVolume(0f);
         music.setLooping(true);
         container = new StateContainer(State.initial());
-        BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-8.fnt"));
+        font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-8.fnt"));
         style = new Label.LabelStyle();
         style.font = font;
         Label.LabelStyle hoverStyle = new Label.LabelStyle(style);
@@ -189,7 +195,13 @@ public class LevelScreen extends ScreenAdapter {
             if (!state.isGameWon()) {
                 return;
             }
-            Gdx.app.log("Win condition", "You won!");
+            router.goToGameEnd(EndState.WON);
+        });
+        container.distinct(State::isGameLost).listen(state -> {
+            if (!state.isGameLost()) {
+                return;
+            }
+            router.goToGameEnd(EndState.LOST);
         });
         container.distinct(State::raeleus).listen(onCharacterChange(raeleus, State::raeleus));
         container.distinct(State::lyze).listen(onCharacterChange(lyze, State::lyze));
@@ -211,7 +223,7 @@ public class LevelScreen extends ScreenAdapter {
         return new ActionsContainer.Listener() {
             @Override
             public void progress(Character.Name name, Progress.Type type) {
-                if (container.current().enoughBattery(30)) {
+                if (!container.current().enoughBattery(30)) {
                     return;
                 }
                 runUpdate(() -> container.update(updates.increaseProgress.create(0.05f, type, name)));
