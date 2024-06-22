@@ -7,7 +7,8 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.github.tommyettinger.ds.ObjectList;
 import io.github.fourlastor.game.di.GameComponent;
-import io.github.fourlastor.game.intro.IntroComponent;
+import io.github.fourlastor.game.end.EndComponent;
+import io.github.fourlastor.game.end.EndState;
 import io.github.fourlastor.game.level.di.LevelComponent;
 import io.github.fourlastor.game.route.Router;
 import io.github.fourlastor.harlequin.Harlequin;
@@ -21,17 +22,17 @@ public class GdxGame extends Game implements Router {
     private final InputMultiplexer multiplexer;
 
     private final LevelComponent.Builder levelScreenFactory;
-    private final IntroComponent.Builder introScreenFactory;
+    private final EndComponent.Builder gameEndScreenFactory;
     private Screen pendingScreen = null;
 
     @Inject
     public GdxGame(
             InputMultiplexer multiplexer,
             LevelComponent.Builder levelScreenFactory,
-            IntroComponent.Builder introScreenFactory) {
+            EndComponent.Builder gameEndScreenFactory) {
         this.multiplexer = multiplexer;
         this.levelScreenFactory = levelScreenFactory;
-        this.introScreenFactory = introScreenFactory;
+        this.gameEndScreenFactory = gameEndScreenFactory;
         Harlequin.LIST_CREATOR = new Harlequin.ListCreator() {
             @Override
             public <T> List<T> newList() {
@@ -62,7 +63,11 @@ public class GdxGame extends Game implements Router {
     @Override
     public void render() {
         if (pendingScreen != null) {
+            Screen currentScreen = getScreen();
             setScreen(pendingScreen);
+            if (currentScreen != null) {
+                currentScreen.dispose();
+            }
             pendingScreen = null;
         }
         super.render();
@@ -73,8 +78,9 @@ public class GdxGame extends Game implements Router {
     }
 
     @Override
-    public void goToIntro() {
-        pendingScreen = introScreenFactory.router(this).build().screen();
+    public void goToGameEnd(EndState endState) {
+        pendingScreen =
+                gameEndScreenFactory.router(this).endState(endState).build().screen();
     }
 
     @Override

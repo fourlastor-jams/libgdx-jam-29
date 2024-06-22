@@ -57,11 +57,15 @@ public abstract class State {
     }
 
     public boolean isGameWon() {
-        return progress().total() == 1;
+        return !isGameLost() && progress().total() >= 1 && day() == 7;
+    }
+
+    public boolean isGameLost() {
+        return availableCharacters().isEmpty() || (progress().total() < 1 && day() == 7);
     }
 
     public boolean enoughBattery(int required) {
-        return battery() <= required;
+        return battery() >= required;
     }
 
     @AutoValue.Builder

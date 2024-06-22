@@ -1,5 +1,6 @@
-package io.github.fourlastor.game.intro;
+package io.github.fourlastor.game.end;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
@@ -12,7 +13,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import javax.inject.Inject;
 
-public class IntroScreen extends ScreenAdapter {
+public class EndScreen extends ScreenAdapter {
 
     public static Color CLEAR_COLOR = new Color(0x333333ff);
 
@@ -21,9 +22,10 @@ public class IntroScreen extends ScreenAdapter {
     private final Viewport viewport;
 
     @Inject
-    public IntroScreen(InputMultiplexer inputMultiplexer, AssetManager assetManager) {
+    public EndScreen(InputMultiplexer inputMultiplexer, AssetManager assetManager, EndState endState) {
         this.inputMultiplexer = inputMultiplexer;
 
+        Gdx.app.log("EndState", endState.name());
         viewport = new FitViewport(256, 144);
         stage = new Stage(viewport);
     }

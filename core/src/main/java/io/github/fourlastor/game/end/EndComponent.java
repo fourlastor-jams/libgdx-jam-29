@@ -1,4 +1,4 @@
-package io.github.fourlastor.game.intro;
+package io.github.fourlastor.game.end;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -7,16 +7,18 @@ import io.github.fourlastor.game.route.Router;
 
 @ScreenScoped
 @Subcomponent
-public interface IntroComponent {
+public interface EndComponent {
 
     @ScreenScoped
-    IntroScreen screen();
+    EndScreen screen();
 
     @Subcomponent.Builder
     interface Builder {
 
         Builder router(@BindsInstance Router router);
 
-        IntroComponent build();
+        Builder endState(@BindsInstance EndState state);
+
+        EndComponent build();
     }
 }
