@@ -260,6 +260,10 @@ public class LevelScreen extends ScreenAdapter {
     private Consumer<State> onCharacterChange(CharacterImage characterImage, Function<State, Character> selector) {
         return state -> {
             Character character = selector.apply(state);
+            if (character.kidnapped()) {
+                characterImage.setVisible(false);
+                return;
+            }
             if (character.cycling()) {
                 characterImage.setCycling();
             } else {
