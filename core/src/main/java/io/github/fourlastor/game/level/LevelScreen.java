@@ -19,12 +19,10 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -58,7 +56,6 @@ public class LevelScreen extends ScreenAdapter {
 
     public static Color CLEAR_COLOR = Color.BLACK;
 
-    private final Router router;
     private final InputMultiplexer inputMultiplexer;
     private final Updates updates;
     private final TextureAtlas atlas;
@@ -66,7 +63,6 @@ public class LevelScreen extends ScreenAdapter {
     private final Viewport viewport;
     private final Stage stage;
     private final StateContainer container;
-    private final Label.LabelStyle style;
     private final Music music;
     private final Image fadeInOut;
     private final BitmapFont font;
@@ -81,7 +77,6 @@ public class LevelScreen extends ScreenAdapter {
             TextureAtlas atlas,
             EnhancedRandom random,
             AssetManager assetManager) {
-        this.router = router;
         this.inputMultiplexer = inputMultiplexer;
         this.viewport = viewport;
         this.updates = updates;
@@ -92,7 +87,7 @@ public class LevelScreen extends ScreenAdapter {
         music.setLooping(true);
         container = new StateContainer(State.initial());
         font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-8.fnt"));
-        style = new Label.LabelStyle();
+        Label.LabelStyle style = new Label.LabelStyle();
         style.font = font;
         Label.LabelStyle hoverStyle = new Label.LabelStyle(style);
         hoverStyle.background = new TextureRegionDrawable(whitePixel).tint(new Color(0xff0044ff));
@@ -112,6 +107,14 @@ public class LevelScreen extends ScreenAdapter {
                 new AnimatedImage(toAnimation(atlas.findRegions("environment/screen/screen"), 0.4f));
         screenImage.setPosition(134, 122);
         stage.addActor(screenImage);
+        AnimatedImage todImage = new AnimatedImage(toAnimation(atlas.findRegions("environment/screen/tod"), 1f));
+        todImage.setPosition(158, 167);
+        todImage.setPlaying(false);
+        stage.addActor(todImage);
+        Label dayLabel = new Label("Day 1", style);
+        dayLabel.setColor(new Color(0xf77622ff));
+        dayLabel.setPosition(175, 169);
+        stage.addActor(dayLabel);
         AnimatedImage paneImage = new AnimatedImage(toAnimation(atlas.findRegions("environment/panel/pane"), 0.2f));
         paneImage.setPosition(342, 41);
         stage.addActor(paneImage);
@@ -186,19 +189,6 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(dragonQueen);
         stage.addActor(panda);
 
-        VerticalGroup debugInfo = new VerticalGroup();
-        debugInfo.align(Align.bottomRight);
-        debugInfo.columnAlign(Align.left);
-        debugInfo.setPosition(stage.getWidth(), 0, Align.bottomRight);
-        Label day = new Label("", style);
-        Label tod = new Label("", style);
-        Label deathSafety = new Label("", style);
-        Label deathAppeared = new Label("", style);
-        debugInfo.addActor(day);
-        debugInfo.addActor(tod);
-        debugInfo.addActor(deathSafety);
-        debugInfo.addActor(deathAppeared);
-        stage.addActor(debugInfo);
         Array<TextureAtlas.AtlasRegion> batteryRegions = atlas.findRegions("environment/battery/battery");
         Array<Drawable> drawables = new Array<>(batteryRegions.size);
         for (TextureRegion region : batteryRegions) {
@@ -221,18 +211,10 @@ public class LevelScreen extends ScreenAdapter {
             storyProgress.setProgress(progress.storyProgress());
             techProgress.setProgress(progress.techProgress());
         });
-        container.distinct(State::battery).listen(state -> {
-            battery.setProgress(state.battery() / 10);
-        });
-        container.distinct(State::day).listen(state -> day.setText("Day " + (state.day() + 1) + " / 7"));
-        container.distinct(State::tod).listen(state -> tod.setText("Time " + (state.tod() + 1) + " / 7"));
-        container.distinct(State::deathSafety).listen(state -> {
-            deathSafety.setText("Safety: " + state.deathSafety() + "%");
-            bg.updateDamage(100 - state.deathSafety());
-        });
-        container
-                .distinct(State::deathAppeared)
-                .listen(state -> deathAppeared.setText("Death appeared: " + state.deathAppeared()));
+        container.distinct(State::battery).listen(state -> battery.setProgress(state.battery() / 10));
+        container.distinct(State::day).listen(state -> dayLabel.setText("Day " + (state.day() + 1) + " / 7"));
+        container.distinct(State::tod).listen(state -> todImage.setProgress(state.tod()));
+        container.distinct(State::deathSafety).listen(state -> bg.updateDamage(100 - state.deathSafety()));
         container.distinct(State::isGameWon).listen(state -> {
             if (!state.isGameWon()) {
                 return;
@@ -249,9 +231,7 @@ public class LevelScreen extends ScreenAdapter {
         container.distinct(State::lyze).listen(onCharacterChange(lyze, State::lyze));
         container.distinct(State::dragonQueen).listen(onCharacterChange(dragonQueen, State::dragonQueen));
         container.distinct(State::panda).listen(onCharacterChange(panda, State::panda));
-        container.distinct(State::catStance).listen(state -> {
-            cat.updateStance(state.catStance());
-        });
+        container.distinct(State::catStance).listen(state -> cat.updateStance(state.catStance()));
         fadeInOut = new Image(whitePixel);
         fadeInOut.setSize(stage.getWidth(), stage.getHeight());
         fadeInOut.setTouchable(Touchable.disabled);
