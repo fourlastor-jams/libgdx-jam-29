@@ -190,12 +190,10 @@ public class LevelScreen extends ScreenAdapter {
         debugInfo.align(Align.bottomRight);
         debugInfo.columnAlign(Align.left);
         debugInfo.setPosition(stage.getWidth(), 0, Align.bottomRight);
-        Label batteryInfo = new Label("Battery", style);
         Label day = new Label("", style);
         Label tod = new Label("", style);
         Label deathSafety = new Label("", style);
         Label deathAppeared = new Label("", style);
-        debugInfo.addActor(batteryInfo);
         debugInfo.addActor(day);
         debugInfo.addActor(tod);
         debugInfo.addActor(deathSafety);
@@ -225,7 +223,6 @@ public class LevelScreen extends ScreenAdapter {
         });
         container.distinct(State::battery).listen(state -> {
             battery.setProgress(state.battery() / 10);
-            batteryInfo.setText("Battery " + state.battery() + "%");
         });
         container.distinct(State::day).listen(state -> day.setText("Day " + (state.day() + 1) + " / 7"));
         container.distinct(State::tod).listen(state -> tod.setText("Time " + (state.tod() + 1) + " / 7"));
@@ -293,12 +290,13 @@ public class LevelScreen extends ScreenAdapter {
                 new CharacterMessage(Character.Name.DRAGON_QUEEN, "Make sure the hull doesn't break. Got it."),
                 new CharacterMessage(Character.Name.LYZE, "What happens if we finish before the deadline?"),
                 new CharacterMessage(Character.Name.RAELEUS, "We need to hold on until the end of the jam."),
-                new CharacterMessage(Character.Name.RAELEUS, "Let's recap:\n1 - Push the progress forward, but don't overwork too much."),
+                new CharacterMessage(
+                        Character.Name.RAELEUS,
+                        "Let's recap:\n1 - Push the progress forward, but don't overwork too much."),
                 new CharacterMessage(Character.Name.RAELEUS, "2 - If you're stressed, chill a bit with the cat."),
                 new CharacterMessage(Character.Name.RAELEUS, "3 - Make sure the hull doesn't break."),
                 new CharacterMessage(Character.Name.RAELEUS, "4 - Hold on until the end of the jam."),
-                new CharacterMessage(Character.Name.RAELEUS, "That's all, let's get started!")
-        );
+                new CharacterMessage(Character.Name.RAELEUS, "That's all, let's get started!"));
     }
 
     private ActionsContainer.Listener listener() {
