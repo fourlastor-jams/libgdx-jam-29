@@ -272,9 +272,9 @@ public class LevelScreen extends ScreenAdapter {
 
     private static List<CharacterMessage> introMessages() {
         return Arrays.asList(
-                new CharacterMessage(Character.Name.RAELEUS, "Alright folks, we gotta finish this jam."),
+                new CharacterMessage(Character.Name.RAELEUS, "Alright team, let's do this."),
                 new CharacterMessage(
-                        Character.Name.RAELEUS, "Work on something, ANYTHING, we need to finish in 7 days."),
+                        Character.Name.RAELEUS, "Work on something, ANYTHING, we need to finish the jam in 7 days."),
                 new CharacterMessage(Character.Name.LYZE, "What happens if we don't finish it?"),
                 new CharacterMessage(Character.Name.PANDA, "We lose."),
                 new CharacterMessage(
@@ -292,7 +292,13 @@ public class LevelScreen extends ScreenAdapter {
                         "We need to keep it in good shape, or someone will have to go out and fix it, and they won't be able to come back in."),
                 new CharacterMessage(Character.Name.DRAGON_QUEEN, "Make sure the hull doesn't break. Got it."),
                 new CharacterMessage(Character.Name.LYZE, "What happens if we finish before the deadline?"),
-                new CharacterMessage(Character.Name.RAELEUS, "We need to hold on until the end of the jam."));
+                new CharacterMessage(Character.Name.RAELEUS, "We need to hold on until the end of the jam."),
+                new CharacterMessage(Character.Name.RAELEUS, "Let's recap:\n1 - Push the progress forward, but don't overwork too much."),
+                new CharacterMessage(Character.Name.RAELEUS, "2 - If you're stressed, chill a bit with the cat."),
+                new CharacterMessage(Character.Name.RAELEUS, "3 - Make sure the hull doesn't break."),
+                new CharacterMessage(Character.Name.RAELEUS, "4 - Hold on until the end of the jam."),
+                new CharacterMessage(Character.Name.RAELEUS, "That's all, let's get started!")
+        );
     }
 
     private ActionsContainer.Listener listener() {
