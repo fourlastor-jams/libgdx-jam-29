@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     env:
-      ITCH_PROJECT: 'sandramoen/libgdx-jam-29'
+      ITCH_PROJECT: 'sandramoen/squid-jam'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
