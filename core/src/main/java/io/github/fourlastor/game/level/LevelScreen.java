@@ -101,7 +101,6 @@ public class LevelScreen extends ScreenAdapter {
                 new AnimatedImage(toAnimation(atlas.findRegions("environment/screen/screen"), 0.4f));
         screenImage.setPosition(134, 122);
         stage.addActor(screenImage);
-        //        stage.addActor(new Image(atlas.findRegion("environment/floor")));
         AnimatedImage paneImage = new AnimatedImage(toAnimation(atlas.findRegions("environment/panel/pane"), 0.2f));
         paneImage.setPosition(342, 41);
         stage.addActor(paneImage);
@@ -119,6 +118,12 @@ public class LevelScreen extends ScreenAdapter {
         Image bikeImage = new Image(atlas.findRegion("environment/bike"));
         bikeImage.setPosition(378, 20);
         stage.addActor(bikeImage);
+        Image box1Image = new Image(atlas.findRegion("environment/boxes/box-1"));
+        box1Image.setPosition(119, 30);
+        stage.addActor(box1Image);
+        Image box2Image = new Image(atlas.findRegion("environment/boxes/box-2"));
+        box2Image.setPosition(288, 4);
+        stage.addActor(box2Image);
 
         Actor hideActionsClickTarget = new Actor();
         hideActionsClickTarget.setSize(480, 270);
