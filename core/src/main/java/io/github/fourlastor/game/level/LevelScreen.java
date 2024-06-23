@@ -113,6 +113,9 @@ public class LevelScreen extends ScreenAdapter {
                 new AnimatedImage(toAnimation(atlas.findRegions("environment/server/server"), 0.2f));
         serverImage.setPosition(28, 0);
         stage.addActor(serverImage);
+        Image scytheImage = new Image(atlas.findRegion("environment/scythe"));
+        scytheImage.setPosition(384, 149);
+        stage.addActor(scytheImage);
 
         Actor hideActionsClickTarget = new Actor();
         hideActionsClickTarget.setSize(480, 270);
