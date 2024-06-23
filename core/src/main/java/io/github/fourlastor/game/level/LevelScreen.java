@@ -81,7 +81,7 @@ public class LevelScreen extends ScreenAdapter {
         this.atlas = atlas;
         this.random = random;
         music = assetManager.get(AssetsModule.PATH_MUSIC);
-        music.setVolume(0f);
+        music.setVolume(0.1f);
         music.setLooping(true);
         container = new StateContainer(State.initial());
         font = new BitmapFont(Gdx.files.internal("fonts/quan-pixel-8.fnt"));
@@ -93,12 +93,45 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(new Image(atlas.findRegion("environment/universe")));
 
         ActionsContainer actions = new ActionsContainer(style, hoverStyle, listener());
-        Image bg = new Image(atlas.findRegion("environment/background"));
+        Image bg = new Image(atlas.findRegion("environment/backgrounds/background-0"));
         stage.addActor(bg);
 
         stage.addActor(new Image(atlas.findRegion("environment/wall-2")));
-        stage.addActor(new Image(atlas.findRegion("environment/wall-1")));
-        stage.addActor(new Image(atlas.findRegion("environment/floor")));
+        AnimatedImage screenImage =
+                new AnimatedImage(toAnimation(atlas.findRegions("environment/screen/screen"), 0.4f));
+        screenImage.setPosition(134, 122);
+        stage.addActor(screenImage);
+        AnimatedImage paneImage = new AnimatedImage(toAnimation(atlas.findRegions("environment/panel/pane"), 0.2f));
+        paneImage.setPosition(342, 41);
+        stage.addActor(paneImage);
+        AnimatedImage computerImage =
+                new AnimatedImage(toAnimation(atlas.findRegions("environment/computer/computer"), 0.2f));
+        computerImage.setPosition(160, 32);
+        stage.addActor(computerImage);
+        AnimatedImage serverImage =
+                new AnimatedImage(toAnimation(atlas.findRegions("environment/server/server"), 0.2f));
+        serverImage.setPosition(28, 0);
+        stage.addActor(serverImage);
+        Image scytheImage = new Image(atlas.findRegion("environment/scythe"));
+        scytheImage.setPosition(384, 149);
+        stage.addActor(scytheImage);
+        Image bikeImage = new Image(atlas.findRegion("environment/bike"));
+        bikeImage.setPosition(378, 20);
+        stage.addActor(bikeImage);
+        Image box1Image = new Image(atlas.findRegion("environment/boxes/box-1"));
+        box1Image.setPosition(119, 30);
+        stage.addActor(box1Image);
+        Image box2Image = new Image(atlas.findRegion("environment/boxes/box-2"));
+        box2Image.setPosition(288, 4);
+        stage.addActor(box2Image);
+        Image light1Image = new Image(atlas.findRegion("environment/lights/light-1"));
+        light1Image.setPosition(84, 28);
+        stage.addActor(light1Image);
+        Image light2Image = new Image(atlas.findRegion("environment/lights/light-2"));
+        light2Image.setPosition(417, 27);
+        stage.addActor(light2Image);
+        Image lightImage = new Image(atlas.findRegion("environment/light"));
+        stage.addActor(lightImage);
 
         Actor hideActionsClickTarget = new Actor();
         hideActionsClickTarget.setSize(480, 270);
