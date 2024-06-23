@@ -137,6 +137,10 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(light2Image);
         Image lightImage = new Image(atlas.findRegion("environment/light"));
         stage.addActor(lightImage);
+        AnimatedImage calendar = new AnimatedImage(toAnimation(atlas.findRegions("environment/calendar/calendar"), 1));
+        calendar.setPosition(104, 93);
+        calendar.setPlaying(false);
+        stage.addActor(calendar);
 
         Actor hideActionsClickTarget = new Actor();
         hideActionsClickTarget.setSize(480, 270);
@@ -221,7 +225,10 @@ public class LevelScreen extends ScreenAdapter {
             battery.setProgress(state.battery() / 10);
             batteryInfo.setText("Battery " + state.battery() + "%");
         });
-        container.distinct(State::day).listen(state -> day.setText("Day " + (state.day() + 1) + " / 7"));
+        container.distinct(State::day).listen(state -> {
+            day.setText("Day " + (state.day() + 1) + " / 7");
+            calendar.setProgress(state.day());
+        });
         container.distinct(State::tod).listen(state -> tod.setText("Time " + (state.tod() + 1) + " / 7"));
         container.distinct(State::deathSafety).listen(state -> {
             deathSafety.setText("Safety: " + state.deathSafety() + "%");
