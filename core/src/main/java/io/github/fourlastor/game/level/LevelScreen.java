@@ -93,7 +93,7 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(new Image(atlas.findRegion("environment/universe")));
 
         ActionsContainer actions = new ActionsContainer(style, hoverStyle, listener());
-        Image bg = new Image(atlas.findRegion("environment/background"));
+        Image bg = new Image(atlas.findRegion("environment/backgrounds/background-0"));
         stage.addActor(bg);
 
         stage.addActor(new Image(atlas.findRegion("environment/wall-2")));
