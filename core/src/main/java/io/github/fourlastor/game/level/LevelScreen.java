@@ -35,6 +35,7 @@ import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.StateContainer;
 import io.github.fourlastor.game.level.state.Updates;
 import io.github.fourlastor.game.level.ui.ActionsContainer;
+import io.github.fourlastor.game.level.ui.BackgroundImage;
 import io.github.fourlastor.game.level.ui.CatImage;
 import io.github.fourlastor.game.level.ui.CharacterImage;
 import io.github.fourlastor.game.level.ui.ProgressBar;
@@ -93,7 +94,11 @@ public class LevelScreen extends ScreenAdapter {
         stage.addActor(new Image(atlas.findRegion("environment/universe")));
 
         ActionsContainer actions = new ActionsContainer(style, hoverStyle, listener());
-        Image bg = new Image(atlas.findRegion("environment/backgrounds/background-0"));
+        BackgroundImage bg = new BackgroundImage(
+                atlas.findRegion("environment/backgrounds/background-0"),
+                atlas.findRegion("environment/backgrounds/background-25"),
+                atlas.findRegion("environment/backgrounds/background-50"),
+                atlas.findRegion("environment/backgrounds/background-100"));
         stage.addActor(bg);
 
         stage.addActor(new Image(atlas.findRegion("environment/wall-2")));
@@ -218,9 +223,10 @@ public class LevelScreen extends ScreenAdapter {
         });
         container.distinct(State::day).listen(state -> day.setText("Day " + (state.day() + 1) + " / 7"));
         container.distinct(State::tod).listen(state -> tod.setText("Time " + (state.tod() + 1) + " / 7"));
-        container
-                .distinct(State::deathSafety)
-                .listen(state -> deathSafety.setText("Safety: " + state.deathSafety() + "%"));
+        container.distinct(State::deathSafety).listen(state -> {
+            deathSafety.setText("Safety: " + state.deathSafety() + "%");
+            bg.updateDamage(100 - state.deathSafety());
+        });
         container
                 .distinct(State::deathAppeared)
                 .listen(state -> deathAppeared.setText("Death appeared: " + state.deathAppeared()));
