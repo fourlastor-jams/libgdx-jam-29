@@ -124,6 +124,14 @@ public class LevelScreen extends ScreenAdapter {
         Image box2Image = new Image(atlas.findRegion("environment/boxes/box-2"));
         box2Image.setPosition(288, 4);
         stage.addActor(box2Image);
+        Image light1Image = new Image(atlas.findRegion("environment/lights/light-1"));
+        light1Image.setPosition(84, 28);
+        stage.addActor(light1Image);
+        Image light2Image = new Image(atlas.findRegion("environment/lights/light-2"));
+        light2Image.setPosition(417, 27);
+        stage.addActor(light2Image);
+        Image lightImage = new Image(atlas.findRegion("environment/light"));
+        stage.addActor(lightImage);
 
         Actor hideActionsClickTarget = new Actor();
         hideActionsClickTarget.setSize(480, 270);
