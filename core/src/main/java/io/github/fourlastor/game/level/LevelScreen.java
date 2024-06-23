@@ -9,6 +9,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -21,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -30,6 +32,7 @@ import com.github.tommyettinger.random.EnhancedRandom;
 import io.github.fourlastor.game.di.modules.AssetsModule;
 import io.github.fourlastor.game.end.EndState;
 import io.github.fourlastor.game.level.state.Character;
+import io.github.fourlastor.game.level.state.CharacterMessage;
 import io.github.fourlastor.game.level.state.Progress;
 import io.github.fourlastor.game.level.state.State;
 import io.github.fourlastor.game.level.state.StateContainer;
@@ -38,11 +41,14 @@ import io.github.fourlastor.game.level.ui.ActionsContainer;
 import io.github.fourlastor.game.level.ui.BackgroundImage;
 import io.github.fourlastor.game.level.ui.CatImage;
 import io.github.fourlastor.game.level.ui.CharacterImage;
+import io.github.fourlastor.game.level.ui.CharacterSpeech;
 import io.github.fourlastor.game.level.ui.ProgressBar;
 import io.github.fourlastor.game.route.Router;
 import io.github.fourlastor.harlequin.animation.Animation;
 import io.github.fourlastor.harlequin.animation.FixedFrameAnimation;
 import io.github.fourlastor.harlequin.ui.AnimatedImage;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.inject.Inject;
@@ -256,6 +262,37 @@ public class LevelScreen extends ScreenAdapter {
         fadeColor.a = 0;
         fadeInOut.setColor(fadeColor);
         stage.addActor(fadeInOut);
+        NinePatchDrawable bubble = new NinePatchDrawable(new NinePatch(atlas.findRegion("bubble"), 3, 3, 1, 1));
+        Label.LabelStyle bubbleStyle = new Label.LabelStyle(style);
+        bubbleStyle.background = bubble;
+        CharacterSpeech characterSpeech = new CharacterSpeech(bubbleStyle);
+        stage.addActor(characterSpeech);
+        characterSpeech.display(introMessages());
+    }
+
+    private static List<CharacterMessage> introMessages() {
+        return Arrays.asList(
+                new CharacterMessage(Character.Name.RAELEUS, "Alright folks, we gotta finish this jam."),
+                new CharacterMessage(
+                        Character.Name.RAELEUS, "Work on something, ANYTHING, we need to finish in 7 days."),
+                new CharacterMessage(Character.Name.LYZE, "What happens if we don't finish it?"),
+                new CharacterMessage(Character.Name.PANDA, "We lose."),
+                new CharacterMessage(
+                        Character.Name.DRAGON_QUEEN,
+                        "We shouldn't overwork. It stresses us out and can cause setbacks."),
+                new CharacterMessage(Character.Name.DRAGON_QUEEN, "You can play with the cat if you need to relax."),
+                new CharacterMessage(Character.Name.LYZE, "What's the bike for?"),
+                new CharacterMessage(Character.Name.RAELEUS, "See that battery on the right?"),
+                new CharacterMessage(
+                        Character.Name.RAELEUS,
+                        "Working on something will consume power, someone will have to recharge it from time to time."),
+                new CharacterMessage(Character.Name.PANDA, "The hull is slowly breaking down."),
+                new CharacterMessage(
+                        Character.Name.PANDA,
+                        "We need to keep it in good shape, or someone will have to go out and fix it, and they won't be able to come back in."),
+                new CharacterMessage(Character.Name.DRAGON_QUEEN, "Make sure the hull doesn't break. Got it."),
+                new CharacterMessage(Character.Name.LYZE, "What happens if we finish before the deadline?"),
+                new CharacterMessage(Character.Name.RAELEUS, "We need to hold on until the end of the jam."));
     }
 
     private ActionsContainer.Listener listener() {
@@ -345,7 +382,8 @@ public class LevelScreen extends ScreenAdapter {
         character.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float clickX, float clickY) {
-                actions.reveal(character.getX() + 30, character.getY() + 75, name);
+                actions.reveal(
+                        character.getX() + Character.IDLE_SIZE.x, character.getY() + Character.IDLE_SIZE.y, name);
             }
         });
         return character;

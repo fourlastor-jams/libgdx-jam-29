@@ -25,6 +25,8 @@ public abstract class Character {
                 .build();
     }
 
+    public static final Vector2 IDLE_SIZE = new Vector2(30, 75);
+
     public enum Name {
         RAELEUS("raeleus", new Vector2(228, 14), new Rectangle(372, 17, 56, 81)),
         LYZE("lyze", new Vector2(192, 14), new Rectangle(372, 18, 65, 80)),
