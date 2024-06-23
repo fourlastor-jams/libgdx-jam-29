@@ -31,8 +31,8 @@ public class ActionsContainer extends VerticalGroup {
         addActor(createProgress(Progress.Type.TECH));
         addActor(createProgress(Progress.Type.STORY));
         addActor(createProgress(Progress.Type.MECH));
-        addActor(createAction("Charge", () -> listener.charge(character)));
-        addActor(createAction("Use light", listener::light));
+        addActor(createAction("Charge battery", () -> listener.charge(character)));
+        addActor(createAction("Fix hull", listener::light));
         addActor(createAction("Pet cat", () -> {
             if (character == null) {
                 return;
